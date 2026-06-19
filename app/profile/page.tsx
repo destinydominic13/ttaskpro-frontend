@@ -186,7 +186,7 @@ export default function ProfilePage() {
                   <div className="text-center py-10 text-gray-500">
                     <div className="text-4xl mb-2">📋</div>
                     <p>No bookings yet</p>
-                    <Link href="/home" className="text-[#0d2d6e] font-semibold hover:underline text-sm">
+                    <Link href="/" className="text-[#0d2d6e] font-semibold hover:underline text-sm">
                       Browse Providers
                     </Link>
                   </div>
