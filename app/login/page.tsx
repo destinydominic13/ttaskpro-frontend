@@ -23,7 +23,7 @@ export default function LoginPage() {
       const res = await API.post('/auth/user/login', form);
       saveToken(res.data.token);
       saveUser(res.data.user);
-      window.location.href = '/home';
+      window.location.href = '/';
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {

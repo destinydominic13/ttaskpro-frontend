@@ -3,20 +3,6 @@ import { useState, useEffect } from 'react';
 import API from '../lib/api';
 import { logout } from '../lib/auth';
 import Link from 'next/link';
-import {
-  Wallet,
-  Banknote,
-  ClipboardList,
-  LogOut,
-  CheckCircle2,
-  AlertTriangle,
-  Inbox,
-  Phone,
-  Check,
-  X,
-  CircleCheckBig,
-  Tag,
-} from 'lucide-react';
 
 export default function ProviderDashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -83,42 +69,27 @@ export default function ProviderDashboardPage() {
     }
   };
 
-  const statusStyles = (status: string) =>
-    status === 'CONFIRMED'
-      ? 'bg-success/10 text-success'
-      : status === 'COMPLETED'
-        ? 'bg-secondary text-primary'
-        : status === 'CANCELLED' || status === 'REJECTED'
-          ? 'bg-destructive/10 text-destructive'
-          : status === 'APPROVED'
-            ? 'bg-success/10 text-success'
-            : 'bg-accent/10 text-warning';
-
-  const pendingBookings = bookings.filter((b: any) => b.status === 'PENDING').length;
-  const completedBookings = bookings.filter((b: any) => b.status === 'COMPLETED').length;
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0d2d6e]"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-lg">
+      <nav className="bg-[#0d2d6e] text-white px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="text-2xl font-black">TTaskPro</div>
         <div className="flex items-center gap-4">
-          <span className="text-primary-foreground/70 text-sm hidden md:block">
+          <span className="text-blue-200 text-sm hidden md:block">
             Welcome, {profile?.username}
           </span>
           <button
             onClick={logout}
-            className="inline-flex items-center gap-2 bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition"
           >
-            <LogOut className="size-4" />
             Logout
           </button>
         </div>
@@ -126,160 +97,119 @@ export default function ProviderDashboardPage() {
 
       <div className="max-w-6xl mx-auto px-6 py-10">
         {/* Profile Header */}
-        <div className="bg-primary rounded-3xl p-8 text-primary-foreground mb-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 size-48 bg-primary-foreground/10 rounded-full -mr-16 -mt-16" />
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
-            <div className="size-24 bg-primary-foreground rounded-full flex items-center justify-center text-primary text-4xl font-black shrink-0">
+        <div className="bg-[#0d2d6e] rounded-2xl p-8 text-white mb-8">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-[#0d2d6e] text-4xl font-black">
               {profile?.fullName?.charAt(0)}
             </div>
             <div className="text-center md:text-left">
               <h1 className="text-3xl font-black">{profile?.fullName}</h1>
-              <p className="text-primary-foreground/70">@{profile?.username}</p>
-              <span className="inline-flex items-center gap-1.5 bg-primary-foreground/10 px-3 py-1 rounded-full text-xs font-semibold mt-2">
-                <Tag className="size-3.5" />
+              <p className="text-blue-200">@{profile?.username}</p>
+              <span className="inline-block bg-white bg-opacity-20 px-3 py-1 rounded-full text-xs font-semibold mt-2">
                 {profile?.category}
               </span>
             </div>
-            <div className="md:ml-auto bg-primary-foreground/10 rounded-2xl p-6 text-center min-w-52">
-              <div className="flex items-center justify-center gap-2 text-primary-foreground/70 text-sm mb-1">
-                <Wallet className="size-4" />
-                Account Balance
-              </div>
+            <div className="md:ml-auto bg-white bg-opacity-20 rounded-2xl p-6 text-center">
+              <p className="text-blue-200 text-sm">Account Balance</p>
               <p className="text-4xl font-black">₦{profile?.balance?.toLocaleString()}</p>
             </div>
           </div>
         </div>
 
-        {/* Summary stat cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Total Bookings', value: bookings.length, icon: ClipboardList },
-            { label: 'Pending', value: pendingBookings, icon: Inbox },
-            { label: 'Completed', value: completedBookings, icon: CircleCheckBig },
-            { label: 'Withdrawals', value: withdrawals.length, icon: Banknote },
-          ].map((s) => {
-            const Icon = s.icon;
-            return (
-              <div
-                key={s.label}
-                className="bg-card border border-border rounded-2xl shadow-sm p-5 flex items-center gap-4"
-              >
-                <div className="size-11 rounded-xl bg-secondary flex items-center justify-center text-primary shrink-0">
-                  <Icon className="size-5" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{s.label}</p>
-                  <p className="text-2xl font-black text-card-foreground">{s.value}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Withdraw Funds */}
-          <div className="bg-card border border-border rounded-2xl shadow-sm p-6">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="size-9 rounded-lg bg-secondary flex items-center justify-center text-primary">
-                <Banknote className="size-5" />
-              </div>
-              <h2 className="text-xl font-bold text-card-foreground">Withdraw Funds</h2>
-            </div>
-            <p className="text-xs text-muted-foreground mb-6 ml-11">A 20% fee applies to all withdrawals</p>
+          <div className="bg-white rounded-2xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-[#0d2d6e] mb-2">Withdraw Funds</h2>
+            <p className="text-xs text-gray-400 mb-6">A 20% fee applies to all withdrawals</p>
 
             {withdrawMsg && (
-              <div className="flex items-center gap-2 bg-success/10 border border-success/20 text-success p-3 rounded-xl mb-4 text-sm">
-                <CheckCircle2 className="size-4 shrink-0" />
-                {withdrawMsg}
+              <div className="bg-green-50 border border-green-200 text-green-600 p-3 rounded-xl mb-4 text-sm">
+                ✅ {withdrawMsg}
               </div>
             )}
             {withdrawError && (
-              <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 text-destructive p-3 rounded-xl mb-4 text-sm">
-                <AlertTriangle className="size-4 shrink-0" />
-                {withdrawError}
+              <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-xl mb-4 text-sm">
+                ⚠️ {withdrawError}
               </div>
             )}
 
             <form onSubmit={handleWithdraw} className="space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Amount (₦)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Amount (₦)</label>
                 <input
                   type="number"
                   value={withdrawForm.amount}
                   onChange={(e) => setWithdrawForm({ ...withdrawForm, amount: e.target.value })}
                   required
                   min="1"
-                  className="w-full border-2 border-input rounded-xl px-4 py-3 bg-background focus:outline-none focus:border-primary transition-colors"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#0d2d6e] transition-colors"
                   placeholder="Enter amount"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Account Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Account Name</label>
                 <input
                   type="text"
                   value={withdrawForm.accountName}
                   onChange={(e) => setWithdrawForm({ ...withdrawForm, accountName: e.target.value })}
                   required
-                  className="w-full border-2 border-input rounded-xl px-4 py-3 bg-background focus:outline-none focus:border-primary transition-colors"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#0d2d6e] transition-colors"
                   placeholder="Account holder name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Account Number</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Account Number</label>
                 <input
                   type="text"
                   value={withdrawForm.accountNumber}
                   onChange={(e) => setWithdrawForm({ ...withdrawForm, accountNumber: e.target.value })}
                   required
-                  className="w-full border-2 border-input rounded-xl px-4 py-3 bg-background focus:outline-none focus:border-primary transition-colors"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#0d2d6e] transition-colors"
                   placeholder="10-digit account number"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-foreground mb-2">Bank Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Bank Name</label>
                 <input
                   type="text"
                   value={withdrawForm.bankName}
                   onChange={(e) => setWithdrawForm({ ...withdrawForm, bankName: e.target.value })}
                   required
-                  className="w-full border-2 border-input rounded-xl px-4 py-3 bg-background focus:outline-none focus:border-primary transition-colors"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#0d2d6e] transition-colors"
                   placeholder="e.g. First Bank"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary-hover transition-colors"
+                className="w-full bg-[#0d2d6e] text-white py-3 rounded-xl font-semibold hover:bg-[#0a2458] transition"
               >
-                <Banknote className="size-4" />
                 Withdraw Funds
               </button>
             </form>
           </div>
 
           {/* Bookings & Withdrawals */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-2xl shadow-sm p-6">
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">
             {/* Tabs */}
             <div className="flex gap-2 mb-6">
               <button
                 onClick={() => setActiveTab('bookings')}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-colors ${
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
                   activeTab === 'bookings'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-secondary'
+                    ? 'bg-[#0d2d6e] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <ClipboardList className="size-4" />
                 Bookings ({bookings.length})
               </button>
               <button
                 onClick={() => setActiveTab('withdrawals')}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-colors ${
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
                   activeTab === 'withdrawals'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-secondary'
+                    ? 'bg-[#0d2d6e] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <Banknote className="size-4" />
                 Withdrawals ({withdrawals.length})
               </button>
             </div>
@@ -288,28 +218,27 @@ export default function ProviderDashboardPage() {
             {activeTab === 'bookings' && (
               <div className="space-y-3">
                 {bookings.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Inbox className="size-10 mx-auto mb-3 text-muted-foreground/50" />
+                  <div className="text-center py-10 text-gray-500">
+                    <div className="text-4xl mb-2">📋</div>
                     <p>No bookings yet</p>
                   </div>
                 ) : (
                   bookings.map((booking: any) => (
-                    <div
-                      key={booking.id}
-                      className="border border-border rounded-xl p-4 hover:border-primary transition-colors"
-                    >
+                    <div key={booking.id} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#0d2d6e] transition">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <p className="font-semibold text-card-foreground">{booking.user?.fullName}</p>
-                          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Phone className="size-3.5" />
-                            {booking.user?.phone}
-                          </p>
-                          <p className="text-xs text-muted-foreground/70">
+                          <p className="font-semibold text-gray-800">{booking.user?.fullName}</p>
+                          <p className="text-sm text-gray-500">{booking.user?.phone}</p>
+                          <p className="text-xs text-gray-400">
                             {new Date(booking.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(booking.status)}`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-600' :
+                          booking.status === 'COMPLETED' ? 'bg-blue-100 text-blue-600' :
+                          booking.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
+                          'bg-yellow-100 text-yellow-600'
+                        }`}>
                           {booking.status}
                         </span>
                       </div>
@@ -317,16 +246,14 @@ export default function ProviderDashboardPage() {
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'CONFIRMED')}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-success text-success-foreground py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity"
+                            className="flex-1 bg-green-500 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-green-600 transition"
                           >
-                            <Check className="size-3.5" />
                             Confirm
                           </button>
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'CANCELLED')}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-destructive text-destructive-foreground py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity"
+                            className="flex-1 bg-red-500 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-red-600 transition"
                           >
-                            <X className="size-3.5" />
                             Decline
                           </button>
                         </div>
@@ -334,9 +261,8 @@ export default function ProviderDashboardPage() {
                       {booking.status === 'CONFIRMED' && (
                         <button
                           onClick={() => updateBookingStatus(booking.id, 'COMPLETED')}
-                          className="w-full inline-flex items-center justify-center gap-1.5 bg-primary text-primary-foreground py-1.5 rounded-lg text-xs font-semibold hover:bg-primary-hover transition-colors mt-2"
+                          className="w-full bg-blue-500 text-white py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-600 transition mt-2"
                         >
-                          <CircleCheckBig className="size-3.5" />
                           Mark as Completed
                         </button>
                       )}
@@ -350,25 +276,26 @@ export default function ProviderDashboardPage() {
             {activeTab === 'withdrawals' && (
               <div className="space-y-3">
                 {withdrawals.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Banknote className="size-10 mx-auto mb-3 text-muted-foreground/50" />
+                  <div className="text-center py-10 text-gray-500">
+                    <div className="text-4xl mb-2">💰</div>
                     <p>No withdrawals yet</p>
                   </div>
                 ) : (
                   withdrawals.map((w: any) => (
-                    <div
-                      key={w.id}
-                      className="border border-border rounded-xl p-4 hover:border-primary transition-colors"
-                    >
+                    <div key={w.id} className="border-2 border-gray-100 rounded-xl p-4 hover:border-[#0d2d6e] transition">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-semibold text-card-foreground">₦{w.amount?.toLocaleString()}</p>
-                          <p className="text-sm text-muted-foreground">{w.bankName} - {w.accountNumber}</p>
-                          <p className="text-xs text-muted-foreground/70">
+                          <p className="font-semibold text-gray-800">₦{w.amount?.toLocaleString()}</p>
+                          <p className="text-sm text-gray-500">{w.bankName} - {w.accountNumber}</p>
+                          <p className="text-xs text-gray-400">
                             {new Date(w.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(w.status)}`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          w.status === 'APPROVED' ? 'bg-green-100 text-green-600' :
+                          w.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
+                          'bg-yellow-100 text-yellow-600'
+                        }`}>
                           {w.status}
                         </span>
                       </div>

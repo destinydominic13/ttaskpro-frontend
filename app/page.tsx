@@ -1,3 +1,7 @@
+'use client';
+import { useState, useEffect } from 'react';
+import API from './lib/api';
+import { getUser, logout } from './lib/auth';
 import Link from 'next/link';
 import {
   Sparkles,
@@ -73,6 +77,174 @@ const calendarDays = Array.from({ length: 31 }, (_, i) => i + 1);
 const leadingBlanks = [null, null, null]; // March starts on a Wednesday-ish offset for visual match
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      setUser(getUser());
+      fetchProviders();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchProviders = async () => {
+    try {
+      const res = await API.get('/provider/all');
+      setProviders(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filtered = providers.filter((p: any) => {
+    const matchSearch =
+      p.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      p.category.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = category ? p.category === category : true;
+    return matchSearch && matchCategory;
+  });
+
+  // ============ LOGGED IN VIEW ============
+  if (isLoggedIn) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Navbar */}
+        <nav className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-lg">
+          <div className="text-2xl font-black">
+            TTaskPro<span className="text-accent">.</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-primary-foreground/70 text-sm hidden md:block">
+              Welcome, {user?.username}
+            </span>
+            <Link
+              href="/profile"
+              className="bg-card text-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition-colors"
+            >
+              My Profile
+            </Link>
+            <button
+              onClick={logout}
+              className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+            >
+              Logout
+            </button>
+          </div>
+        </nav>
+
+        {/* Hero */}
+        <div className="bg-primary text-primary-foreground py-16 px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-black mb-4 text-balance">
+            Find Your Perfect Service Provider
+          </h1>
+          <p className="text-primary-foreground/70 text-lg mb-8">
+            Browse trusted professionals for every chore around your home
+          </p>
+
+          {/* Search */}
+          <div className="max-w-2xl mx-auto flex flex-col md:flex-row gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search by name or category..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">All Categories</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Electrical">Electrical</option>
+              <option value="Carpentry">Carpentry</option>
+              <option value="Painting">Painting</option>
+              <option value="Gardening">Gardening</option>
+              <option value="Cooking">Cooking</option>
+              <option value="Laundry">Laundry</option>
+              <option value="Moving">Moving</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Providers Grid */}
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <h2 className="text-2xl font-bold text-primary mb-6">
+            {filtered.length} Service Providers Available
+          </h2>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-20 text-muted-foreground">
+              <Search className="size-12 mx-auto mb-4" />
+              <p className="text-xl">No providers found</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((provider: any) => (
+                <div
+                  key={provider.id}
+                  className="bg-card rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-border"
+                >
+                  <div className="bg-primary p-6 text-primary-foreground">
+                    <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center text-primary text-2xl font-black mx-auto mb-3">
+                      {provider.fullName.charAt(0)}
+                    </div>
+                    <h3 className="text-lg font-bold text-center">{provider.fullName}</h3>
+                    <p className="text-primary-foreground/70 text-sm text-center">@{provider.username}</p>
+                  </div>
+
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="bg-secondary text-primary px-3 py-1 rounded-full text-xs font-semibold">
+                        {provider.category}
+                      </span>
+                      <span className="text-muted-foreground text-sm">
+                        {provider.experience} exp
+                      </span>
+                    </div>
+
+                    {provider.skills?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {provider.skills.slice(0, 3).map((skill: string) => (
+                          <span
+                            key={skill}
+                            className="bg-secondary text-muted-foreground px-2 py-1 rounded text-xs"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ============ LOGGED OUT VIEW (Marketing Landing Page) ============
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
@@ -89,12 +261,17 @@ export default function LandingPage() {
             <a href="#experts" className="hover:text-primary transition-colors">Experts</a>
             <a href="#news" className="hover:text-primary transition-colors">News</a>
           </div>
-          <Link
-            href="/register"
-            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-hover transition-colors"
-          >
-            Get Started
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/login" className="text-primary font-semibold hover:underline text-sm">
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-hover transition-colors"
+            >
+              Get Started
+            </Link>
+          </div>
         </nav>
       </header>
 
