@@ -1,8 +1,8 @@
-'use client';
-import { useState, useEffect } from 'react';
-import API from './lib/api';
-import { getUser, logout } from './lib/auth';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect } from "react";
+import API from "./lib/api";
+import { getUser, logout } from "./lib/auth";
+import Link from "next/link";
 import {
   Sparkles,
   Wrench,
@@ -27,49 +27,101 @@ import {
   MapPin,
   Mail,
   Calendar,
-} from 'lucide-react';
+} from "lucide-react";
 
 const services = [
-  { icon: Sparkles, title: 'Easy Cleaning', desc: 'Spotless homes handled by vetted, professional cleaners you can trust.' },
-  { icon: Wrench, title: 'Best Plumbing', desc: 'Fast, reliable plumbing repairs and installations, done right the first time.' },
-  { icon: Zap, title: 'Smart Electrical', desc: 'Licensed electricians for safe wiring, fixtures, and quick fault fixes.' },
-  { icon: PaintRoller, title: 'Cool Painting', desc: 'Fresh, flawless finishes from experienced painters for any room.' },
+  {
+    icon: Sparkles,
+    title: "Easy Cleaning",
+    desc: "Spotless homes handled by vetted, professional cleaners you can trust.",
+  },
+  {
+    icon: Wrench,
+    title: "Best Plumbing",
+    desc: "Fast, reliable plumbing repairs and installations, done right the first time.",
+  },
+  {
+    icon: Zap,
+    title: "Smart Electrical",
+    desc: "Licensed electricians for safe wiring, fixtures, and quick fault fixes.",
+  },
+  {
+    icon: PaintRoller,
+    title: "Cool Painting",
+    desc: "Fresh, flawless finishes from experienced painters for any room.",
+  },
 ];
 
 const whyChoose = [
-  { icon: ShieldCheck, title: 'Verified Pros', desc: 'Every provider is identity-checked and reviewed before taking bookings.' },
-  { icon: Clock, title: 'Quick Service', desc: 'Most providers respond within minutes so you are never left waiting.' },
-  { icon: Wallet, title: 'Secure Payments', desc: 'Funds stay safe in your wallet and release only when the job is done.' },
-  { icon: Truck, title: 'Fast Delivery', desc: 'Get matched with nearby pros for same-day help when you need it.' },
-  { icon: CalendarCheck, title: 'Online Booking', desc: 'Book, reschedule, and track your tasks from a single dashboard.' },
-  { icon: Headphones, title: '24/7 Support', desc: 'Our team is on hand around the clock to keep every job on track.' },
+  {
+    icon: ShieldCheck,
+    title: "Verified Pros",
+    desc: "Every provider is identity-checked and reviewed before taking bookings.",
+  },
+  {
+    icon: Clock,
+    title: "Quick Service",
+    desc: "Most providers respond within minutes so you are never left waiting.",
+  },
+  {
+    icon: Wallet,
+    title: "Secure Payments",
+    desc: "Funds stay safe in your wallet and release only when the job is done.",
+  },
+  {
+    icon: Truck,
+    title: "Fast Delivery",
+    desc: "Get matched with nearby pros for same-day help when you need it.",
+  },
+  {
+    icon: CalendarCheck,
+    title: "Online Booking",
+    desc: "Book, reschedule, and track your tasks from a single dashboard.",
+  },
+  {
+    icon: Headphones,
+    title: "24/7 Support",
+    desc: "Our team is on hand around the clock to keep every job on track.",
+  },
 ];
 
 const experts = [
-  { name: 'Rosalina D. William', role: 'Lead Cleaner', img: '/images/expert-2.png' },
-  { name: 'Gilima B. Bumbled', role: 'Master Plumber', img: '/images/expert-1.png' },
-  { name: 'Humble H. Hiliam', role: 'Electrician', img: '/images/expert-3.png' },
+  {
+    name: "Rosalina D. William",
+    role: "Lead Cleaner",
+    img: "/images/expert-2.png",
+  },
+  {
+    name: "Gilima B. Bumbled",
+    role: "Master Plumber",
+    img: "/images/expert-1.png",
+  },
+  {
+    name: "Humble H. Hiliam",
+    role: "Electrician",
+    img: "/images/expert-3.png",
+  },
 ];
 
 const portfolio = [
-  '/images/work-1.png',
-  '/images/work-2.png',
-  '/images/work-3.png',
-  '/images/work-4.png',
-  '/images/appointment.png',
-  '/images/news-2.png',
+  "/images/work-1.png",
+  "/images/work-2.png",
+  "/images/work-3.png",
+  "/images/work-4.png",
+  "/images/appointment.png",
+  "/images/news-2.png",
 ];
 
 const news = [
   {
-    img: '/images/news-1.png',
-    date: '23rd Mar 2026',
-    title: 'Five simple habits that keep your home spotless all week long.',
+    img: "/images/news-1.png",
+    date: "23rd Mar 2026",
+    title: "Five simple habits that keep your home spotless all week long.",
   },
   {
-    img: '/images/news-2.png',
-    date: '21st Mar 2026',
-    title: 'How to choose the right service provider for any home project.',
+    img: "/images/news-2.png",
+    date: "21st Mar 2026",
+    title: "How to choose the right service provider for any home project.",
   },
 ];
 
@@ -81,11 +133,29 @@ export default function LandingPage() {
   const [user, setUser] = useState<any>(null);
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
-
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [selectedProviderId, setSelectedProviderId] = useState("");
+  const [bookingMsg, setBookingMsg] = useState("");
+  const [bookingError, setBookingError] = useState("");
+  const [bookingLoading, setBookingLoading] = useState(false);
+  
+  const handleBooking = async () => {
+    setBookingMsg("");
+    setBookingError("");
+    setBookingLoading(true);
+    try {
+      await API.post("/booking", { providerId: selectedProviderId });
+      setBookingMsg("Appointment booked! The provider will confirm it on their dashboard.");
+      setSelectedProviderId("");
+    } catch (err: any) {
+      setBookingError(err.response?.data?.message || "Booking failed. Please try again.");
+    } finally {
+      setBookingLoading(false);
+    }
+  };
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
       setUser(getUser());
@@ -97,7 +167,7 @@ export default function LandingPage() {
 
   const fetchProviders = async () => {
     try {
-      const res = await API.get('/provider/all');
+      const res = await API.get("/provider/all");
       setProviders(res.data);
     } catch (err) {
       console.error(err);
@@ -115,134 +185,138 @@ export default function LandingPage() {
   });
 
   // ============ LOGGED IN VIEW ============
-  if (isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Navbar */}
-        <nav className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-lg">
-          <div className="text-2xl font-black">
-            TTaskPro<span className="text-accent">.</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-primary-foreground/70 text-sm hidden md:block">
-              Welcome, {user?.username}
-            </span>
-            <Link
-              href="/profile"
-              className="bg-card text-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition-colors"
-            >
-              My Profile
-            </Link>
-            <button
-              onClick={logout}
-              className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Logout
-            </button>
-          </div>
-        </nav>
+  // if (isLoggedIn) {
+  //   return (
+  //     <div className="min-h-screen bg-background">
+  //       {/* Navbar */}
+  //       <nav className="bg-primary text-primary-foreground px-6 py-4 flex items-center justify-between shadow-lg">
+  //         <div className="text-2xl font-black">
+  //           TTaskPro<span className="text-accent">.</span>
+  //         </div>
+  //         <div className="flex items-center gap-4">
+  //           <span className="text-primary-foreground/70 text-sm hidden md:block">
+  //             Welcome, {user?.username}
+  //           </span>
+  //           <Link
+  //             href="/profile"
+  //             className="bg-card text-primary px-4 py-2 rounded-lg text-sm font-semibold hover:bg-secondary transition-colors"
+  //           >
+  //             My Profile
+  //           </Link>
+  //           <button
+  //             onClick={logout}
+  //             className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+  //           >
+  //             Logout
+  //           </button>
+  //         </div>
+  //       </nav>
 
-        {/* Hero */}
-        <div className="bg-primary text-primary-foreground py-16 px-6 text-center">
-          <h1 className="text-4xl md:text-5xl font-black mb-4 text-balance">
-            Find Your Perfect Service Provider
-          </h1>
-          <p className="text-primary-foreground/70 text-lg mb-8">
-            Browse trusted professionals for every chore around your home
-          </p>
+  //       {/* Hero */}
+  //       <div className="bg-primary text-primary-foreground py-16 px-6 text-center">
+  //         <h1 className="text-4xl md:text-5xl font-black mb-4 text-balance">
+  //           Find Your Perfect Service Provider
+  //         </h1>
+  //         <p className="text-primary-foreground/70 text-lg mb-8">
+  //           Browse trusted professionals for every chore around your home
+  //         </p>
 
-          {/* Search */}
-          <div className="max-w-2xl mx-auto flex flex-col md:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by name or category..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
-            >
-              <option value="">All Categories</option>
-              <option value="Cleaning">Cleaning</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Carpentry">Carpentry</option>
-              <option value="Painting">Painting</option>
-              <option value="Gardening">Gardening</option>
-              <option value="Cooking">Cooking</option>
-              <option value="Laundry">Laundry</option>
-              <option value="Moving">Moving</option>
-            </select>
-          </div>
-        </div>
+  //         {/* Search */}
+  //         <div className="max-w-2xl mx-auto flex flex-col md:flex-row gap-3">
+  //           <div className="flex-1 relative">
+  //             <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+  //             <input
+  //               type="text"
+  //               placeholder="Search by name or category..."
+  //               value={search}
+  //               onChange={(e) => setSearch(e.target.value)}
+  //               className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+  //             />
+  //           </div>
+  //           <select
+  //             value={category}
+  //             onChange={(e) => setCategory(e.target.value)}
+  //             className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+  //           >
+  //             <option value="">All Categories</option>
+  //             <option value="Cleaning">Cleaning</option>
+  //             <option value="Plumbing">Plumbing</option>
+  //             <option value="Electrical">Electrical</option>
+  //             <option value="Carpentry">Carpentry</option>
+  //             <option value="Painting">Painting</option>
+  //             <option value="Gardening">Gardening</option>
+  //             <option value="Cooking">Cooking</option>
+  //             <option value="Laundry">Laundry</option>
+  //             <option value="Moving">Moving</option>
+  //           </select>
+  //         </div>
+  //       </div>
 
-        {/* Providers Grid */}
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <h2 className="text-2xl font-bold text-primary mb-6">
-            {filtered.length} Service Providers Available
-          </h2>
+  //       {/* Providers Grid */}
+  //       <div className="max-w-6xl mx-auto px-6 py-12">
+  //         <h2 className="text-2xl font-bold text-primary mb-6">
+  //           {filtered.length} Service Providers Available
+  //         </h2>
 
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">
-              <Search className="size-12 mx-auto mb-4" />
-              <p className="text-xl">No providers found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((provider: any) => (
-                <div
-                  key={provider.id}
-                  className="bg-card rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-border"
-                >
-                  <div className="bg-primary p-6 text-primary-foreground">
-                    <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center text-primary text-2xl font-black mx-auto mb-3">
-                      {provider.fullName.charAt(0)}
-                    </div>
-                    <h3 className="text-lg font-bold text-center">{provider.fullName}</h3>
-                    <p className="text-primary-foreground/70 text-sm text-center">@{provider.username}</p>
-                  </div>
+  //         {loading ? (
+  //           <div className="flex justify-center items-center py-20">
+  //             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+  //           </div>
+  //         ) : filtered.length === 0 ? (
+  //           <div className="text-center py-20 text-muted-foreground">
+  //             <Search className="size-12 mx-auto mb-4" />
+  //             <p className="text-xl">No providers found</p>
+  //           </div>
+  //         ) : (
+  //           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  //             {filtered.map((provider: any) => (
+  //               <div
+  //                 key={provider.id}
+  //                 className="bg-card rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-border"
+  //               >
+  //                 <div className="bg-primary p-6 text-primary-foreground">
+  //                   <div className="w-16 h-16 bg-card rounded-full flex items-center justify-center text-primary text-2xl font-black mx-auto mb-3">
+  //                     {provider.fullName.charAt(0)}
+  //                   </div>
+  //                   <h3 className="text-lg font-bold text-center">
+  //                     {provider.fullName}
+  //                   </h3>
+  //                   <p className="text-primary-foreground/70 text-sm text-center">
+  //                     @{provider.username}
+  //                   </p>
+  //                 </div>
 
-                  <div className="p-6 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="bg-secondary text-primary px-3 py-1 rounded-full text-xs font-semibold">
-                        {provider.category}
-                      </span>
-                      <span className="text-muted-foreground text-sm">
-                        {provider.experience} exp
-                      </span>
-                    </div>
+  //                 <div className="p-6 space-y-3">
+  //                   <div className="flex items-center justify-between">
+  //                     <span className="bg-secondary text-primary px-3 py-1 rounded-full text-xs font-semibold">
+  //                       {provider.category}
+  //                     </span>
+  //                     <span className="text-muted-foreground text-sm">
+  //                       {provider.experience} exp
+  //                     </span>
+  //                   </div>
 
-                    {provider.skills?.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {provider.skills.slice(0, 3).map((skill: string) => (
-                          <span
-                            key={skill}
-                            className="bg-secondary text-muted-foreground px-2 py-1 rounded text-xs"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  //                   {provider.skills?.length > 0 && (
+  //                     <div className="flex flex-wrap gap-1">
+  //                       {provider.skills.slice(0, 3).map((skill: string) => (
+  //                         <span
+  //                           key={skill}
+  //                           className="bg-secondary text-muted-foreground px-2 py-1 rounded text-xs"
+  //                         >
+  //                           {skill}
+  //                         </span>
+  //                       ))}
+  //                     </div>
+  //                   )}
+  //                 </div>
+  //               </div>
+  //             ))}
+  //           </div>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // ============ LOGGED OUT VIEW (Marketing Landing Page) ============
   return (
@@ -254,23 +328,63 @@ export default function LandingPage() {
             TTaskPro<span className="text-accent">.</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground">
-            <a href="#home" className="hover:text-primary transition-colors">Home</a>
-            <a href="#about" className="hover:text-primary transition-colors">About</a>
-            <a href="#services" className="hover:text-primary transition-colors">Services</a>
-            <a href="#booking" className="hover:text-primary transition-colors">Booking</a>
-            <a href="#experts" className="hover:text-primary transition-colors">Experts</a>
-            <a href="#news" className="hover:text-primary transition-colors">News</a>
+            <a href="#home" className="hover:text-primary transition-colors">
+              Home
+            </a>
+            <a href="#about" className="hover:text-primary transition-colors">
+              About
+            </a>
+            <a
+              href="#services"
+              className="hover:text-primary transition-colors"
+            >
+              Services
+            </a>
+            <a href="#booking" className="hover:text-primary transition-colors">
+              Booking
+            </a>
+            <a href="#experts" className="hover:text-primary transition-colors">
+              Experts
+            </a>
+            <a href="#news" className="hover:text-primary transition-colors">
+              News
+            </a>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-primary font-semibold hover:underline text-sm">
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-hover transition-colors"
-            >
-              Get Started
-            </Link>
+          {isLoggedIn ? (
+  <>
+    <span className="text-muted-foreground text-sm font-semibold hidden sm:block">
+      Welcome, {user?.username}
+    </span>
+    <Link
+      href="/profile"
+      className="text-primary font-semibold hover:underline text-sm"
+    >
+      My Profile
+    </Link>
+    <button
+      onClick={logout}
+      className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+    >
+      Logout
+    </button>
+  </>
+) : (
+  <>
+    <Link
+      href="/login"
+      className="text-primary font-semibold hover:underline text-sm"
+    >
+      Login
+    </Link>
+    <Link
+      href="/register"
+      className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-hover transition-colors"
+      >
+          Get Started
+    </Link>
+      </>
+  )}
           </div>
         </nav>
       </header>
@@ -301,10 +415,12 @@ export default function LandingPage() {
                 Trusted Home &amp; Task Services Here
               </h1>
               <p className="text-lg text-muted-foreground mb-8 leading-relaxed text-pretty">
-                Connect with verified professionals for cleaning, plumbing, electrical work and
-                more — booked and paid for safely in one place.
+                Connect with verified professionals for cleaning, plumbing,
+                electrical work and more — booked and paid for safely in one
+                place.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
+              {!isLoggedIn && (
                 <Link
                   href="/register"
                   className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 rounded-full font-semibold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
@@ -312,6 +428,7 @@ export default function LandingPage() {
                   Get Started
                   <ArrowRight className="size-5" />
                 </Link>
+                )}
                 <a
                   href="#services"
                   className="inline-flex items-center justify-center bg-accent text-accent-foreground px-7 py-3.5 rounded-full font-semibold hover:opacity-90 transition-opacity"
@@ -332,11 +449,16 @@ export default function LandingPage() {
           {services.map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.title} className="relative text-center flex flex-col items-center">
+              <div
+                key={s.title}
+                className="relative text-center flex flex-col items-center"
+              >
                 <div className="size-20 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-center text-primary mb-5 relative z-10">
                   <Icon className="size-9" />
                 </div>
-                <h3 className="text-lg font-bold text-primary mb-2">{s.title}</h3>
+                <h3 className="text-lg font-bold text-primary mb-2">
+                  {s.title}
+                </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed max-w-[15rem]">
                   {s.desc}
                 </p>
@@ -360,14 +482,18 @@ export default function LandingPage() {
                 <Phone className="size-5" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide opacity-80">Make A Call</p>
+                <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
+                  Make A Call
+                </p>
                 <p className="text-lg font-black">+876 (87) 656 656</p>
               </div>
             </div>
           </div>
 
           <div>
-            <span className="text-accent font-bold uppercase tracking-wide text-sm">24/7 We Are Here</span>
+            <span className="text-accent font-bold uppercase tracking-wide text-sm">
+              24/7 We Are Here
+            </span>
             <h2 className="text-3xl md:text-4xl font-black text-primary mt-2 mb-6 text-balance">
               Make An Appointment
             </h2>
@@ -384,9 +510,13 @@ export default function LandingPage() {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-muted-foreground mb-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                    <div key={d} className="py-1">{d}</div>
-                  ))}
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                    (d) => (
+                      <div key={d} className="py-1">
+                        {d}
+                      </div>
+                    )
+                  )}
                 </div>
                 <div className="grid grid-cols-7 gap-1 text-center text-sm">
                   {leadingBlanks.map((_, i) => (
@@ -397,8 +527,8 @@ export default function LandingPage() {
                       key={day}
                       className={`py-2 rounded-lg ${
                         day === 24
-                          ? 'bg-accent text-accent-foreground font-bold'
-                          : 'text-card-foreground hover:bg-secondary'
+                          ? "bg-accent text-accent-foreground font-bold"
+                          : "text-card-foreground hover:bg-secondary"
                       }`}
                     >
                       {day}
@@ -421,18 +551,21 @@ export default function LandingPage() {
             className="rounded-3xl w-full object-cover aspect-[4/5] max-h-[560px] shadow-sm"
           />
           <div className="bg-card border border-border rounded-3xl p-8 md:p-10 shadow-sm">
-            <span className="text-accent font-bold uppercase tracking-wide text-sm">About Us</span>
+            <span className="text-accent font-bold uppercase tracking-wide text-sm">
+              About Us
+            </span>
             <h2 className="text-3xl md:text-4xl font-black text-primary mt-2 mb-5 text-balance">
               We Offer The Best Home Services
             </h2>
             <p className="text-muted-foreground leading-relaxed mb-4">
-              TTaskPro connects you with trusted, background-checked professionals for every task
-              around your home and business. From a quick fix to a full project, the right pro is
-              only a few taps away.
+              TTaskPro connects you with trusted, background-checked
+              professionals for every task around your home and business. From a
+              quick fix to a full project, the right pro is only a few taps
+              away.
             </p>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              Every booking is protected with secure payments and transparent reviews, so you can
-              hire with total peace of mind.
+              Every booking is protected with secure payments and transparent
+              reviews, so you can hire with total peace of mind.
             </p>
             <div className="flex items-center gap-4 border-t border-border pt-6">
               <img
@@ -441,7 +574,9 @@ export default function LandingPage() {
                 className="size-12 rounded-full object-cover"
               />
               <div>
-                <p className="font-bold text-card-foreground">Rosalina D. William</p>
+                <p className="font-bold text-card-foreground">
+                  Rosalina D. William
+                </p>
                 <p className="text-sm text-muted-foreground">Founder</p>
               </div>
             </div>
@@ -452,58 +587,81 @@ export default function LandingPage() {
       {/* Booking */}
       <section id="booking" className="px-6 py-20 md:py-24 max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <span className="text-accent font-bold uppercase tracking-wide text-sm">Booking</span>
+          <span className="text-accent font-bold uppercase tracking-wide text-sm">
+            Booking
+          </span>
           <h2 className="text-3xl md:text-4xl font-black text-primary mt-2 text-balance">
             Complete Your Booking
           </h2>
         </div>
         <div className="bg-card border border-border rounded-3xl shadow-sm p-6 md:p-10">
-          <p className="text-center font-bold text-primary mb-6">Service Information</p>
+          <p className="text-center font-bold text-primary mb-6">
+            Service Information
+          </p>
           <div className="flex flex-wrap justify-center gap-3 mb-6">
-            {['1 Task', '2 Tasks', '3 Tasks', '4 Tasks', 'Custom'].map((opt, i) => (
-              <span
-                key={opt}
-                className={`px-5 py-2 rounded-full text-sm font-semibold border ${
-                  i === 1
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background text-muted-foreground border-border'
-                }`}
-              >
-                {opt}
-              </span>
-            ))}
+            {["1 Task", "2 Tasks", "3 Tasks", "4 Tasks", "Custom"].map(
+              (opt, i) => (
+                <span
+                  key={opt}
+                  className={`px-5 py-2 rounded-full text-sm font-semibold border ${
+                    i === 1
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background text-muted-foreground border-border"
+                  }`}
+                >
+                  {opt}
+                </span>
+              )
+            )}
           </div>
-          <div className="grid sm:grid-cols-2 gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="Enter Your Name"
-              className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <input
-              type="email"
-              placeholder="Enter Your Email"
-              className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <input
-              type="text"
-              placeholder="Your Address"
-              className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <input
-              type="text"
-              placeholder="Date / Time Opening"
-              className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <div className="flex justify-center pt-2">
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 bg-accent text-accent-foreground px-8 py-3.5 rounded-full font-semibold hover:opacity-90 transition-opacity"
-            >
-              Get An Appointment
-              <ArrowRight className="size-5" />
-            </Link>
-          </div>
+          {isLoggedIn ? (
+  <>
+    {bookingMsg && (
+      <div className="mb-4 rounded-xl bg-secondary text-primary px-4 py-3 text-sm font-semibold text-center">
+        {bookingMsg}
+      </div>
+    )}
+    {bookingError && (
+      <div className="mb-4 rounded-xl bg-destructive/10 text-destructive px-4 py-3 text-sm font-semibold text-center">
+        {bookingError}
+      </div>
+    )}
+    <div className="grid sm:grid-cols-2 gap-4 mb-4">
+      <select
+        value={selectedProviderId}
+        onChange={(e) => setSelectedProviderId(e.target.value)}
+        className="w-full bg-background border border-input rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring sm:col-span-2"
+      >
+        <option value="">Select a Service Provider</option>
+        {providers.map((p: any) => (
+          <option key={p.id} value={p.id}>
+            {p.fullName} — {p.category}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="flex justify-center pt-2">
+      <button
+        onClick={handleBooking}
+        disabled={!selectedProviderId || bookingLoading}
+        className="inline-flex items-center justify-center gap-2 bg-accent text-accent-foreground px-8 py-3.5 rounded-full font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+      >
+        {bookingLoading ? "Booking..." : "Get An Appointment"}
+        <ArrowRight className="size-5" />
+      </button>
+    </div>
+  </>
+) : (
+  <div className="flex justify-center pt-2">
+    <Link
+      href="/register"
+      className="inline-flex items-center justify-center gap-2 bg-accent text-accent-foreground px-8 py-3.5 rounded-full font-semibold hover:opacity-90 transition-opacity"
+    >
+      Get An Appointment
+      <ArrowRight className="size-5" />
+    </Link>
+  </div>
+)}
         </div>
       </section>
 
@@ -528,7 +686,9 @@ export default function LandingPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-primary mb-1">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {f.desc}
+                    </p>
                   </div>
                 </div>
               );
@@ -540,7 +700,9 @@ export default function LandingPage() {
       {/* Portfolio */}
       <section className="px-6 py-20 md:py-24 max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <span className="text-accent font-bold uppercase tracking-wide text-sm">Works</span>
+          <span className="text-accent font-bold uppercase tracking-wide text-sm">
+            Works
+          </span>
           <h2 className="text-3xl md:text-4xl font-black text-primary mt-2 text-balance">
             Our Portfolio
           </h2>
@@ -550,11 +712,11 @@ export default function LandingPage() {
             <div
               key={src}
               className={`group relative overflow-hidden rounded-2xl ${
-                i === 0 ? 'col-span-2 md:col-span-1' : ''
+                i === 0 ? "col-span-2 md:col-span-1" : ""
               }`}
             >
               <img
-                src={src || '/placeholder.svg'}
+                src={src || "/placeholder.svg"}
                 alt="Completed service work by a TTaskPro professional"
                 className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -569,24 +731,39 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <span className="text-accent font-bold uppercase tracking-wide text-sm">Workers</span>
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">
+                Workers
+              </span>
               <h2 className="text-3xl md:text-4xl font-black text-primary-foreground mt-2 text-balance">
                 Our Experts
               </h2>
             </div>
             <div className="hidden sm:flex items-center gap-3">
-              <button className="size-11 rounded-full border border-primary-foreground/30 text-primary-foreground flex items-center justify-center hover:bg-primary-foreground/10 transition-colors" aria-label="Previous">
+              <button
+                className="size-11 rounded-full border border-primary-foreground/30 text-primary-foreground flex items-center justify-center hover:bg-primary-foreground/10 transition-colors"
+                aria-label="Previous"
+              >
                 <ArrowLeft className="size-5" />
               </button>
-              <button className="size-11 rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="Next">
+              <button
+                className="size-11 rounded-full bg-accent text-accent-foreground flex items-center justify-center hover:opacity-90 transition-opacity"
+                aria-label="Next"
+              >
                 <ArrowRight className="size-5" />
               </button>
             </div>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {experts.map((e) => (
-              <div key={e.name} className="bg-card rounded-3xl overflow-hidden shadow-sm">
-                <img src={e.img || '/placeholder.svg'} alt={e.name} className="w-full h-72 object-cover" />
+              <div
+                key={e.name}
+                className="bg-card rounded-3xl overflow-hidden shadow-sm"
+              >
+                <img
+                  src={e.img || "/placeholder.svg"}
+                  alt={e.name}
+                  className="w-full h-72 object-cover"
+                />
                 <div className="p-6 text-center">
                   <h3 className="text-lg font-bold text-primary">{e.name}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{e.role}</p>
@@ -606,22 +783,36 @@ export default function LandingPage() {
       {/* News + CTA */}
       <section id="news" className="px-6 py-20 md:py-24 max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <span className="text-accent font-bold uppercase tracking-wide text-sm">News</span>
+          <span className="text-accent font-bold uppercase tracking-wide text-sm">
+            News
+          </span>
           <h2 className="text-3xl md:text-4xl font-black text-primary mt-2 text-balance">
             Get Every Update
           </h2>
         </div>
         <div className="grid lg:grid-cols-3 gap-6">
           {news.map((n) => (
-            <article key={n.title} className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm">
-              <img src={n.img || '/placeholder.svg'} alt={n.title} className="w-full h-52 object-cover" />
+            <article
+              key={n.title}
+              className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm"
+            >
+              <img
+                src={n.img || "/placeholder.svg"}
+                alt={n.title}
+                className="w-full h-52 object-cover"
+              />
               <div className="p-6">
                 <div className="flex items-center gap-2 text-sm text-accent font-semibold mb-3">
                   <Calendar className="size-4" />
                   {n.date}
                 </div>
-                <h3 className="text-lg font-bold text-primary leading-snug text-pretty">{n.title}</h3>
-                <Link href="/register" className="inline-flex items-center gap-1 text-sm font-semibold text-primary mt-4 hover:underline">
+                <h3 className="text-lg font-bold text-primary leading-snug text-pretty">
+                  {n.title}
+                </h3>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-primary mt-4 hover:underline"
+                >
                   Read More <ArrowRight className="size-4" />
                 </Link>
               </div>
@@ -632,12 +823,15 @@ export default function LandingPage() {
           <div className="bg-primary rounded-3xl p-8 flex flex-col justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 size-40 bg-primary-foreground/10 rounded-full -mr-12 -mt-12" />
             <div className="relative z-10">
-              <span className="text-accent font-bold uppercase tracking-wide text-sm">Call To Action</span>
+              <span className="text-accent font-bold uppercase tracking-wide text-sm">
+                Call To Action
+              </span>
               <h3 className="text-2xl font-black text-primary-foreground mt-2 mb-3 text-balance">
                 Our team of experts is ready to help in your area.
               </h3>
               <p className="text-primary-foreground/70 mb-6 leading-relaxed">
-                Join thousands of happy customers and book your first task today.
+                Join thousands of happy customers and book your first task
+                today.
               </p>
               <Link
                 href="/register"
@@ -660,8 +854,8 @@ export default function LandingPage() {
                 TTaskPro<span className="text-accent">.</span>
               </div>
               <p className="text-primary-foreground/70 leading-relaxed text-sm mb-6">
-                The trusted marketplace connecting you with verified professionals for every task
-                around your home and business.
+                The trusted marketplace connecting you with verified
+                professionals for every task around your home and business.
               </p>
               <div className="flex items-center gap-3">
                 {[Share2, AtSign, Send, Globe].map((Icon, i) => (
@@ -680,10 +874,38 @@ export default function LandingPage() {
             <div>
               <h4 className="font-bold mb-4">Company</h4>
               <ul className="space-y-3 text-sm text-primary-foreground/70">
-                <li><a href="#about" className="hover:text-accent transition-colors">About Us</a></li>
-                <li><a href="#services" className="hover:text-accent transition-colors">Our Services</a></li>
-                <li><a href="#experts" className="hover:text-accent transition-colors">Our Experts</a></li>
-                <li><a href="#news" className="hover:text-accent transition-colors">News &amp; Blog</a></li>
+                <li>
+                  <a
+                    href="#about"
+                    className="hover:text-accent transition-colors"
+                  >
+                    About Us
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#services"
+                    className="hover:text-accent transition-colors"
+                  >
+                    Our Services
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#experts"
+                    className="hover:text-accent transition-colors"
+                  >
+                    Our Experts
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#news"
+                    className="hover:text-accent transition-colors"
+                  >
+                    News &amp; Blog
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -691,7 +913,8 @@ export default function LandingPage() {
               <h4 className="font-bold mb-4">Contact</h4>
               <ul className="space-y-3 text-sm text-primary-foreground/70">
                 <li className="flex items-center gap-2">
-                  <Clock className="size-4 text-accent" /> Mon – Fri: 8:00 – 18:00
+                  <Clock className="size-4 text-accent" /> Mon – Fri: 8:00 –
+                  18:00
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="size-4 text-accent" /> +876 (87) 656 656
@@ -700,7 +923,8 @@ export default function LandingPage() {
                   <Mail className="size-4 text-accent" /> hello@ttaskpro.com
                 </li>
                 <li className="flex items-center gap-2">
-                  <MapPin className="size-4 text-accent" /> 24 Service Street, Lagos
+                  <MapPin className="size-4 text-accent" /> 24 Service Street,
+                  Lagos
                 </li>
               </ul>
             </div>
@@ -711,7 +935,7 @@ export default function LandingPage() {
                 {portfolio.slice(0, 6).map((src) => (
                   <img
                     key={src}
-                    src={src || '/placeholder.svg'}
+                    src={src || "/placeholder.svg"}
                     alt="Service work thumbnail"
                     className="w-full h-16 object-cover rounded-lg"
                   />
