@@ -1,8 +1,8 @@
-'use client';
-import { useState, useEffect } from 'react';
-import API from '../lib/api';
-import { getUser, logout } from '../lib/auth';
-import Link from 'next/link';
+"use client";
+import { useState, useEffect } from "react";
+import API from "../lib/api";
+import { getUser, logout } from "../lib/auth";
+import Link from "next/link";
 import {
   LogOut,
   Wallet,
@@ -14,23 +14,26 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [transferForm, setTransferForm] = useState({ providerUsername: '', amount: '' });
-  const [transferMsg, setTransferMsg] = useState('');
-  const [transferError, setTransferError] = useState('');
-  const [activeTab, setActiveTab] = useState('bookings');
+  const [transferForm, setTransferForm] = useState({
+    providerUsername: "",
+    amount: "",
+  });
+  const [transferMsg, setTransferMsg] = useState("");
+  const [transferError, setTransferError] = useState("");
+  const [activeTab, setActiveTab] = useState("bookings");
   const [showFundModal, setShowFundModal] = useState(false);
-  const [fundAmount, setFundAmount] = useState('');
+  const [fundAmount, setFundAmount] = useState("");
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      window.location.href = '/login';
+    if (!localStorage.getItem("token")) {
+      window.location.href = "/login";
     }
     fetchProfile();
   }, []);
@@ -38,9 +41,9 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const [profileRes, bookingsRes, transactionsRes] = await Promise.all([
-        API.get('/user/profile'),
-        API.get('/user/bookings'),
-        API.get('/user/transactions'),
+        API.get("/user/profile"),
+        API.get("/user/bookings"),
+        API.get("/user/transactions"),
       ]);
       setUser(profileRes.data);
       setBookings(bookingsRes.data);
@@ -54,33 +57,31 @@ export default function ProfilePage() {
 
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTransferMsg('');
-    setTransferError('');
+    setTransferMsg("");
+    setTransferError("");
     try {
-      const res = await API.post('/user/transfer', {
+      const res = await API.post("/user/transfer", {
         providerUsername: transferForm.providerUsername,
         amount: parseFloat(transferForm.amount),
       });
       setTransferMsg(res.data.message);
-      setTransferForm({ providerUsername: '', amount: '' });
+      setTransferForm({ providerUsername: "", amount: "" });
       fetchProfile();
     } catch (err: any) {
-      setTransferError(err.response?.data?.message || 'Transfer failed');
+      setTransferError(err.response?.data?.message || "Transfer failed");
     }
   };
 
   const handleFundAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await API.post('/user/fund-account', {
+      const res = await API.post("/user/fund-account", {
         amount: parseFloat(fundAmount),
       });
-      setTransferMsg(`Successfully funded with ₦${fundAmount}`);
-      setFundAmount('');
-      setShowFundModal(false);
-      fetchProfile();
+      // Redirect user to Paystack's payment page
+      window.location.href = res.data.authorizationUrl;
     } catch (err: any) {
-      setTransferError(err.response?.data?.message || 'Funding failed');
+      setTransferError(err.response?.data?.message || "Funding failed");
     }
   };
 
@@ -98,7 +99,10 @@ export default function ProfilePage() {
       <nav className="bg-primary text-white px-6 py-4 flex items-center justify-between shadow-lg sticky top-0 z-50">
         <div className="text-2xl font-black">TTaskPro</div>
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-primary-foreground/80 hover:text-primary-foreground text-sm font-medium transition flex items-center gap-1">
+          <Link
+            href="/"
+            className="text-primary-foreground/80 hover:text-primary-foreground text-sm font-medium transition flex items-center gap-1"
+          >
             Browse Providers
           </Link>
           <button
@@ -128,14 +132,18 @@ export default function ProfilePage() {
             <div className="text-center md:text-left flex-1">
               <h1 className="text-3xl font-black">{user?.fullName}</h1>
               <p className="text-primary-foreground/80">@{user?.username}</p>
-              <p className="text-primary-foreground/70 text-sm">{user?.email}</p>
+              <p className="text-primary-foreground/70 text-sm">
+                {user?.email}
+              </p>
             </div>
             <div className="md:ml-auto bg-white/15 backdrop-blur border border-white/20 rounded-2xl p-6 text-center">
               <p className="text-primary-foreground/80 text-sm flex items-center gap-2 justify-center">
                 <Wallet className="size-4" />
                 Account Balance
               </p>
-              <p className="text-4xl font-black mt-2">₦{user?.balance?.toLocaleString()}</p>
+              <p className="text-4xl font-black mt-2">
+                ₦{user?.balance?.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -144,10 +152,14 @@ export default function ProfilePage() {
         {showFundModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-card rounded-2xl shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-foreground mb-4">Fund Your Account</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">
+                Fund Your Account
+              </h3>
               <form onSubmit={handleFundAccount} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">Amount (₦)</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">
+                    Amount (₦)
+                  </label>
                   <input
                     type="number"
                     value={fundAmount}
@@ -207,7 +219,12 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   value={transferForm.providerUsername}
-                  onChange={(e) => setTransferForm({ ...transferForm, providerUsername: e.target.value })}
+                  onChange={(e) =>
+                    setTransferForm({
+                      ...transferForm,
+                      providerUsername: e.target.value,
+                    })
+                  }
                   required
                   className="w-full border-2 border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors bg-card"
                   placeholder="Enter provider username"
@@ -220,7 +237,9 @@ export default function ProfilePage() {
                 <input
                   type="number"
                   value={transferForm.amount}
-                  onChange={(e) => setTransferForm({ ...transferForm, amount: e.target.value })}
+                  onChange={(e) =>
+                    setTransferForm({ ...transferForm, amount: e.target.value })
+                  }
                   required
                   min="1"
                   className="w-full border-2 border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary transition-colors bg-card"
@@ -241,22 +260,22 @@ export default function ProfilePage() {
             {/* Tabs */}
             <div className="flex gap-2 mb-6">
               <button
-                onClick={() => setActiveTab('bookings')}
+                onClick={() => setActiveTab("bookings")}
                 className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
-                  activeTab === 'bookings'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  activeTab === "bookings"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
                 <BookMarked className="size-4" />
                 Bookings ({bookings.length})
               </button>
               <button
-                onClick={() => setActiveTab('transactions')}
+                onClick={() => setActiveTab("transactions")}
                 className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
-                  activeTab === 'transactions'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  activeTab === "transactions"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
                 <CreditCard className="size-4" />
@@ -265,36 +284,57 @@ export default function ProfilePage() {
             </div>
 
             {/* Bookings Tab */}
-            {activeTab === 'bookings' && (
+            {activeTab === "bookings" && (
               <div className="space-y-3">
                 {bookings.length === 0 ? (
                   <div className="text-center py-10 text-muted-foreground">
                     <BookMarked className="size-12 mx-auto mb-3 opacity-50" />
                     <p className="font-medium">No bookings yet</p>
-                    <Link href="/" className="text-primary font-semibold hover:underline text-sm">
+                    <Link
+                      href="/"
+                      className="text-primary font-semibold hover:underline text-sm"
+                    >
                       Browse Providers
                     </Link>
                   </div>
                 ) : (
                   bookings.map((booking: any) => (
-                    <div key={booking.id} className="border-2 border-border rounded-xl p-4 hover:border-primary/50 hover:bg-muted/30 transition">
+                    <div
+                      key={booking.id}
+                      className="border-2 border-border rounded-xl p-4 hover:border-primary/50 hover:bg-muted/30 transition"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="font-semibold text-foreground">{booking.provider?.fullName}</p>
-                          <p className="text-sm text-muted-foreground">{booking.provider?.category}</p>
+                          <p className="font-semibold text-foreground">
+                            {booking.provider?.fullName}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {booking.provider?.category}
+                          </p>
                           <p className="text-xs text-muted-foreground/70">
                             {new Date(booking.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 ${
-                          booking.status === 'CONFIRMED' ? 'bg-success/10 text-success' :
-                          booking.status === 'COMPLETED' ? 'bg-primary/10 text-primary' :
-                          booking.status === 'CANCELLED' ? 'bg-destructive/10 text-destructive' :
-                          'bg-warning/10 text-warning'
-                        }`}>
-                          {booking.status === 'COMPLETED' && <CheckCircle2 className="size-3" />}
-                          {booking.status === 'CONFIRMED' && <Clock className="size-3" />}
-                          {booking.status === 'CANCELLED' && <XCircle className="size-3" />}
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 ${
+                            booking.status === "CONFIRMED"
+                              ? "bg-success/10 text-success"
+                              : booking.status === "COMPLETED"
+                              ? "bg-primary/10 text-primary"
+                              : booking.status === "CANCELLED"
+                              ? "bg-destructive/10 text-destructive"
+                              : "bg-warning/10 text-warning"
+                          }`}
+                        >
+                          {booking.status === "COMPLETED" && (
+                            <CheckCircle2 className="size-3" />
+                          )}
+                          {booking.status === "CONFIRMED" && (
+                            <Clock className="size-3" />
+                          )}
+                          {booking.status === "CANCELLED" && (
+                            <XCircle className="size-3" />
+                          )}
                           {booking.status}
                         </span>
                       </div>
@@ -305,7 +345,7 @@ export default function ProfilePage() {
             )}
 
             {/* Transactions Tab */}
-            {activeTab === 'transactions' && (
+            {activeTab === "transactions" && (
               <div className="space-y-3">
                 {transactions.length === 0 ? (
                   <div className="text-center py-10 text-muted-foreground">
@@ -314,15 +354,22 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   transactions.map((tx: any) => (
-                    <div key={tx.id} className="border-2 border-border rounded-xl p-4 hover:border-destructive/30 hover:bg-destructive/5 transition">
+                    <div
+                      key={tx.id}
+                      className="border-2 border-border rounded-xl p-4 hover:border-destructive/30 hover:bg-destructive/5 transition"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <p className="font-semibold text-foreground">{tx.note}</p>
+                          <p className="font-semibold text-foreground">
+                            {tx.note}
+                          </p>
                           <p className="text-xs text-muted-foreground/70">
                             {new Date(tx.date).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className="text-destructive font-bold ml-4">-₦{tx.amount?.toLocaleString()}</span>
+                        <span className="text-destructive font-bold ml-4">
+                          -₦{tx.amount?.toLocaleString()}
+                        </span>
                       </div>
                     </div>
                   ))
