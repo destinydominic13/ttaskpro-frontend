@@ -485,7 +485,7 @@ export default function LandingPage() {
                 <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
                   Make A Call
                 </p>
-                <p className="text-lg font-black">+876 (87) 656 656</p>
+                <p className="text-lg font-black">+2349063371999</p>
               </div>
             </div>
           </div>
@@ -575,7 +575,7 @@ export default function LandingPage() {
               />
               <div>
                 <p className="font-bold text-card-foreground">
-                  Rosalina D. William
+                  Dominic Destiny
                 </p>
                 <p className="text-sm text-muted-foreground">Founder</p>
               </div>
