@@ -34,9 +34,9 @@ export default function ProviderLoginPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background lg:flex-row">
       {/* Brand panel */}
-      <aside className="relative flex flex-col justify-between bg-primary px-8 py-10 text-primary-foreground lg:w-[45%] lg:px-12 lg:py-14">
+      <aside className="relative flex flex-col justify-between bg-gradient-to-br from-[#0d2d6e] to-[#0a2458] px-8 py-10 text-white lg:w-[45%] lg:px-12 lg:py-14">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-foreground/15 ring-1 ring-primary-foreground/20">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f59e0b] ring-1 ring-[#f59e0b]/20">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -45,34 +45,34 @@ export default function ProviderLoginPage() {
               strokeWidth="2.2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-5 w-5"
+              className="h-5 w-5 text-[#0d2d6e]"
               aria-hidden="true"
             >
               <path d="M9 11l3 3L22 4" />
               <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
             </svg>
           </div>
-          <span className="text-lg font-semibold tracking-tight">
-            TaskPro <span className="font-normal opacity-80">for Providers</span>
+          <span className="text-lg font-black tracking-tight">
+            TTaskPro <span className="font-normal opacity-80">for Providers</span>
           </span>
         </div>
 
         <div className="hidden max-w-sm flex-col gap-5 lg:flex">
-          <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight">
-            Grow your business with TaskPro.
+          <h2 className="text-balance text-3xl font-black leading-tight tracking-tight">
+            Grow your business with TTaskPro.
           </h2>
-          <p className="text-pretty leading-relaxed text-primary-foreground/80">
+          <p className="text-pretty leading-relaxed text-white/80">
             Sign in to manage bookings, connect with clients, and get paid for
             the work you do best.
           </p>
-          <ul className="flex flex-col gap-3 pt-2 text-sm text-primary-foreground/90">
+          <ul className="flex flex-col gap-3 pt-2 text-sm text-white/90">
             {[
               'Receive booking requests near you',
               'Manage your schedule in one place',
               'Fast, secure payouts',
             ].map((item) => (
               <li key={item} className="flex items-center gap-3">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground/15">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f59e0b]/20 text-[#f59e0b] font-bold">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -93,8 +93,8 @@ export default function ProviderLoginPage() {
           </ul>
         </div>
 
-        <p className="hidden text-sm text-primary-foreground/70 lg:block">
-          &copy; {new Date().getFullYear()} TaskPro. All rights reserved.
+        <p className="hidden text-sm text-white/60 lg:block">
+          &copy; {new Date().getFullYear()} TTaskPro. All rights reserved.
         </p>
       </aside>
 
@@ -172,7 +172,7 @@ export default function ProviderLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 flex w-full items-center justify-center rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-1 flex w-full items-center justify-center rounded-lg bg-[#f59e0b] px-4 py-2.5 text-sm font-bold text-[#0d2d6e] transition hover:bg-[#f59e0b]/90 focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/40 disabled:cursor-not-allowed disabled:opacity-60 shadow-lg shadow-[#f59e0b]/30"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -183,18 +183,18 @@ export default function ProviderLoginPage() {
               Don&apos;t have an account?{' '}
               <Link
                 href="/provider-register"
-                className="font-medium text-primary hover:underline"
+                className="font-bold text-[#f59e0b] hover:text-[#f59e0b]/80"
               >
-                Register as Provider
+                Register here
               </Link>
             </p>
             <p>
-              Are you a user?{' '}
+              Are you a customer?{' '}
               <Link
                 href="/login"
-                className="font-medium text-primary hover:underline"
+                className="font-bold text-[#f59e0b] hover:text-[#f59e0b]/80"
               >
-                User Login
+                Customer Login
               </Link>
             </p>
           </div>
