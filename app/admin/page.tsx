@@ -2,6 +2,17 @@
 import { useState, useEffect } from 'react';
 import API from '../lib/api';
 import { logout } from '../lib/auth';
+import {
+  LogOut,
+  Users,
+  Wrench,
+  BookMarked,
+  DollarSign,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  AlertCircle,
+} from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -72,33 +83,34 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0d2d6e]"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#0d2d6e] border-t-transparent"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-2xl shadow-md text-center max-w-md">
-          <div className="text-5xl mb-4">🚫</div>
-          <h1 className="text-xl font-bold text-red-600 mb-2">Access Denied</h1>
-          <p className="text-gray-500">{error}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="bg-card p-8 rounded-2xl shadow-lg border border-border text-center max-w-md">
+          <AlertCircle className="size-16 mx-auto mb-4 text-destructive" />
+          <h1 className="text-xl font-bold text-destructive mb-2">Access Denied</h1>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Navbar */}
-      <nav className="bg-[#0d2d6e] text-white px-6 py-4 flex items-center justify-between shadow-lg">
+      <nav className="bg-gradient-to-r from-[#0d2d6e] to-[#0a2458] text-white px-6 py-4 flex items-center justify-between shadow-lg sticky top-0 z-50">
         <div className="text-2xl font-black">TTaskPro Admin</div>
         <button
           onClick={logout}
-          className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition"
+          className="bg-destructive text-destructive-foreground px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition flex items-center gap-2"
         >
+          <LogOut className="size-4" />
           Logout
         </button>
       </nav>
@@ -107,29 +119,31 @@ export default function AdminDashboardPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Users', value: stats?.totalUsers, icon: '👤' },
-            { label: 'Total Providers', value: stats?.totalProviders, icon: '🔧' },
-            { label: 'Total Bookings', value: stats?.totalBookings, icon: '📋' },
-            { label: 'Pending Withdrawals', value: stats?.pendingWithdrawals, icon: '💰' },
+            { label: 'Total Users', value: stats?.totalUsers, Icon: Users },
+            { label: 'Total Providers', value: stats?.totalProviders, Icon: Wrench },
+            { label: 'Total Bookings', value: stats?.totalBookings, Icon: BookMarked },
+            { label: 'Pending Withdrawals', value: stats?.pendingWithdrawals, Icon: DollarSign },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl shadow-md p-6 text-center">
-              <div className="text-3xl mb-2">{stat.icon}</div>
+            <div key={stat.label} className="bg-card rounded-2xl shadow-lg border border-border p-6 text-center hover:shadow-xl hover:border-[#f59e0b]/30 transition">
+              <div className="flex justify-center mb-3">
+                <stat.Icon className="size-8 text-[#f59e0b]" />
+              </div>
               <p className="text-3xl font-black text-[#0d2d6e]">{stat.value}</p>
-              <p className="text-sm text-gray-500">{stat.label}</p>
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {['overview', 'users', 'providers', 'bookings', 'withdrawals'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-5 py-2.5 rounded-xl font-semibold text-sm whitespace-nowrap transition ${
                 activeTab === tab
-                  ? 'bg-[#0d2d6e] text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-100'
+                  ? 'bg-[#0d2d6e] text-white shadow-lg'
+                  : 'bg-card text-muted-foreground border border-border hover:border-[#0d2d6e]/30'
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -137,22 +151,22 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-md p-6">
+        <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
           {/* Overview */}
           {activeTab === 'overview' && (
             <div>
               <h2 className="text-xl font-bold text-[#0d2d6e] mb-4">Platform Overview</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="border-2 border-gray-100 rounded-xl p-4">
-                  <p className="text-gray-500 text-sm">Total Transactions</p>
+                <div className="border-2 border-border rounded-xl p-4 hover:border-[#f59e0b]/50 hover:bg-muted/30 transition">
+                  <p className="text-muted-foreground text-sm">Total Transactions</p>
                   <p className="text-2xl font-black text-[#0d2d6e]">{stats?.totalTransactions}</p>
                 </div>
-                <div className="border-2 border-gray-100 rounded-xl p-4">
-                  <p className="text-gray-500 text-sm">Total Withdrawals</p>
+                <div className="border-2 border-border rounded-xl p-4 hover:border-[#f59e0b]/50 hover:bg-muted/30 transition">
+                  <p className="text-muted-foreground text-sm">Total Withdrawals</p>
                   <p className="text-2xl font-black text-[#0d2d6e]">{stats?.totalWithdrawals}</p>
                 </div>
-                <div className="border-2 border-gray-100 rounded-xl p-4">
-                  <p className="text-gray-500 text-sm">Pending Bookings</p>
+                <div className="border-2 border-border rounded-xl p-4 hover:border-[#f59e0b]/50 hover:bg-muted/30 transition">
+                  <p className="text-muted-foreground text-sm">Pending Bookings</p>
                   <p className="text-2xl font-black text-[#0d2d6e]">{stats?.pendingBookings}</p>
                 </div>
               </div>
@@ -166,25 +180,25 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-left">
-                      <th className="p-3 rounded-tl-xl">Name</th>
-                      <th className="p-3">Username</th>
-                      <th className="p-3">Email</th>
-                      <th className="p-3">Balance</th>
-                      <th className="p-3 rounded-tr-xl">Action</th>
+                    <tr className="bg-muted text-left">
+                      <th className="p-3 rounded-tl-xl text-foreground font-bold">Name</th>
+                      <th className="p-3 text-foreground font-bold">Username</th>
+                      <th className="p-3 text-foreground font-bold">Email</th>
+                      <th className="p-3 text-foreground font-bold">Balance</th>
+                      <th className="p-3 rounded-tr-xl text-foreground font-bold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((u: any) => (
-                      <tr key={u.id} className="border-b border-gray-100">
-                        <td className="p-3 font-semibold text-gray-800">{u.fullName}</td>
-                        <td className="p-3 text-gray-600">@{u.username}</td>
-                        <td className="p-3 text-gray-600">{u.email}</td>
-                        <td className="p-3 text-gray-600">₦{u.balance?.toLocaleString()}</td>
+                      <tr key={u.id} className="border-b border-border hover:bg-muted/50 transition">
+                        <td className="p-3 font-semibold text-foreground">{u.fullName}</td>
+                        <td className="p-3 text-muted-foreground">@{u.username}</td>
+                        <td className="p-3 text-muted-foreground">{u.email}</td>
+                        <td className="p-3 text-muted-foreground">₦{u.balance?.toLocaleString()}</td>
                         <td className="p-3">
                           <button
                             onClick={() => deleteUser(u.id)}
-                            className="text-red-500 hover:text-red-700 font-semibold"
+                            className="text-destructive hover:text-destructive/80 font-semibold"
                           >
                             Delete
                           </button>
@@ -204,25 +218,25 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-left">
-                      <th className="p-3 rounded-tl-xl">Name</th>
-                      <th className="p-3">Category</th>
-                      <th className="p-3">Email</th>
-                      <th className="p-3">Balance</th>
-                      <th className="p-3 rounded-tr-xl">Action</th>
+                    <tr className="bg-muted text-left">
+                      <th className="p-3 rounded-tl-xl text-foreground font-bold">Name</th>
+                      <th className="p-3 text-foreground font-bold">Category</th>
+                      <th className="p-3 text-foreground font-bold">Email</th>
+                      <th className="p-3 text-foreground font-bold">Balance</th>
+                      <th className="p-3 rounded-tr-xl text-foreground font-bold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {providers.map((p: any) => (
-                      <tr key={p.id} className="border-b border-gray-100">
-                        <td className="p-3 font-semibold text-gray-800">{p.fullName}</td>
-                        <td className="p-3 text-gray-600">{p.category}</td>
-                        <td className="p-3 text-gray-600">{p.email}</td>
-                        <td className="p-3 text-gray-600">₦{p.balance?.toLocaleString()}</td>
+                      <tr key={p.id} className="border-b border-border hover:bg-muted/50 transition">
+                        <td className="p-3 font-semibold text-foreground">{p.fullName}</td>
+                        <td className="p-3 text-muted-foreground">{p.category}</td>
+                        <td className="p-3 text-muted-foreground">{p.email}</td>
+                        <td className="p-3 text-muted-foreground">₦{p.balance?.toLocaleString()}</td>
                         <td className="p-3">
                           <button
                             onClick={() => deleteProvider(p.id)}
-                            className="text-red-500 hover:text-red-700 font-semibold"
+                            className="text-destructive hover:text-destructive/80 font-semibold"
                           >
                             Delete
                           </button>
@@ -242,29 +256,32 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-left">
-                      <th className="p-3 rounded-tl-xl">User</th>
-                      <th className="p-3">Provider</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 rounded-tr-xl">Date</th>
+                    <tr className="bg-muted text-left">
+                      <th className="p-3 rounded-tl-xl text-foreground font-bold">User</th>
+                      <th className="p-3 text-foreground font-bold">Provider</th>
+                      <th className="p-3 text-foreground font-bold">Status</th>
+                      <th className="p-3 rounded-tr-xl text-foreground font-bold">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((b: any) => (
-                      <tr key={b.id} className="border-b border-gray-100">
-                        <td className="p-3 font-semibold text-gray-800">{b.user?.fullName}</td>
-                        <td className="p-3 text-gray-600">{b.provider?.fullName}</td>
+                      <tr key={b.id} className="border-b border-border hover:bg-muted/50 transition">
+                        <td className="p-3 font-semibold text-foreground">{b.user?.fullName}</td>
+                        <td className="p-3 text-muted-foreground">{b.provider?.fullName}</td>
                         <td className="p-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            b.status === 'CONFIRMED' ? 'bg-green-100 text-green-600' :
-                            b.status === 'COMPLETED' ? 'bg-blue-100 text-blue-600' :
-                            b.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
-                            'bg-yellow-100 text-yellow-600'
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${
+                            b.status === 'CONFIRMED' ? 'bg-success/10 text-success' :
+                            b.status === 'COMPLETED' ? 'bg-primary/10 text-primary' :
+                            b.status === 'CANCELLED' ? 'bg-destructive/10 text-destructive' :
+                            'bg-warning/10 text-warning'
                           }`}>
+                            {b.status === 'COMPLETED' && <CheckCircle2 className="size-3" />}
+                            {b.status === 'CONFIRMED' && <Clock className="size-3" />}
+                            {b.status === 'CANCELLED' && <XCircle className="size-3" />}
                             {b.status}
                           </span>
                         </td>
-                        <td className="p-3 text-gray-500">{new Date(b.createdAt).toLocaleDateString()}</td>
+                        <td className="p-3 text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -280,26 +297,27 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50 text-left">
-                      <th className="p-3 rounded-tl-xl">Provider</th>
-                      <th className="p-3">Amount</th>
-                      <th className="p-3">Bank Details</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 rounded-tr-xl">Action</th>
+                    <tr className="bg-muted text-left">
+                      <th className="p-3 rounded-tl-xl text-foreground font-bold">Provider</th>
+                      <th className="p-3 text-foreground font-bold">Amount</th>
+                      <th className="p-3 text-foreground font-bold">Bank Details</th>
+                      <th className="p-3 text-foreground font-bold">Status</th>
+                      <th className="p-3 rounded-tr-xl text-foreground font-bold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {withdrawals.map((w: any) => (
-                      <tr key={w.id} className="border-b border-gray-100">
-                        <td className="p-3 font-semibold text-gray-800">{w.provider?.fullName}</td>
-                        <td className="p-3 text-gray-600">₦{w.amount?.toLocaleString()}</td>
-                        <td className="p-3 text-gray-600">{w.bankName} - {w.accountNumber}</td>
+                      <tr key={w.id} className="border-b border-border hover:bg-muted/50 transition">
+                        <td className="p-3 font-semibold text-foreground">{w.provider?.fullName}</td>
+                        <td className="p-3 text-muted-foreground">₦{w.amount?.toLocaleString()}</td>
+                        <td className="p-3 text-muted-foreground">{w.bankName} - {w.accountNumber}</td>
                         <td className="p-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            w.status === 'APPROVED' ? 'bg-green-100 text-green-600' :
-                            w.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
-                            'bg-yellow-100 text-yellow-600'
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 w-fit ${
+                            w.status === 'APPROVED' ? 'bg-success/10 text-success' :
+                            w.status === 'REJECTED' ? 'bg-destructive/10 text-destructive' :
+                            'bg-warning/10 text-warning'
                           }`}>
+                            {w.status === 'APPROVED' && <CheckCircle2 className="size-3" />}
                             {w.status}
                           </span>
                         </td>
@@ -308,13 +326,13 @@ export default function AdminDashboardPage() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => updateWithdrawal(w.id, 'APPROVED')}
-                                className="text-green-600 hover:text-green-800 font-semibold text-xs"
+                                className="text-success hover:text-success/80 font-semibold text-xs"
                               >
                                 Approve
                               </button>
                               <button
                                 onClick={() => updateWithdrawal(w.id, 'REJECTED')}
-                                className="text-red-500 hover:text-red-700 font-semibold text-xs"
+                                className="text-destructive hover:text-destructive/80 font-semibold text-xs"
                               >
                                 Reject
                               </button>
