@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import API from '../lib/api';
 import { logout } from '../lib/auth';
-import Link from 'next/link';
 import {
   LogOut,
   Wallet,
@@ -13,7 +12,6 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-  Phone,
 } from 'lucide-react';
 
 export default function ProviderDashboardPage() {
@@ -22,6 +20,9 @@ export default function ProviderDashboardPage() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bookings');
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
   const [withdrawForm, setWithdrawForm] = useState({
     amount: '',
     accountName: '',
@@ -48,6 +49,11 @@ export default function ProviderDashboardPage() {
       setProfile(profileRes.data);
       setBookings(bookingsRes.data);
       setWithdrawals(dashboardRes.data.withdrawals);
+
+      const reviewsRes = await API.get(`/provider/${profileRes.data.id}/reviews`);
+      setReviews(reviewsRes.data.reviews);
+      setAvgRating(reviewsRes.data.avgRating);
+      setTotalReviews(reviewsRes.data.totalReviews);
     } catch (err) {
       console.error(err);
     } finally {
@@ -121,6 +127,26 @@ export default function ProviderDashboardPage() {
               <span className="inline-block bg-accent text-accent-foreground px-4 py-2 rounded-full text-xs font-bold mt-2 shadow-md">
                 {profile?.category}
               </span>
+              {avgRating > 0 && (
+                <div className="flex items-center justify-center md:justify-start gap-1 mt-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`w-4 h-4 ${
+                        star <= Math.round(avgRating)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'fill-white/20 text-white/20'
+                      }`}
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  ))}
+                  <span className="text-blue-200 text-xs ml-1">
+                    {avgRating} ({totalReviews} reviews)
+                  </span>
+                </div>
+              )}
             </div>
             <div className="md:ml-auto bg-white/15 backdrop-blur border border-white/20 rounded-2xl p-6 text-center shadow-lg">
               <p className="text-primary-foreground/80 text-sm flex items-center gap-2 justify-center mb-2">
@@ -134,7 +160,7 @@ export default function ProviderDashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Withdraw Funds */}
-          <div className="bg-card rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
+          <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
             <h2 className="text-xl font-bold text-primary mb-1 flex items-center gap-2">
               <DollarSign className="size-5" />
               Withdraw Funds
@@ -202,38 +228,46 @@ export default function ProviderDashboardPage() {
               </div>
               <button
                 type="submit"
-                className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary/90 transition shadow-md shadow-primary/30"
+                className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold hover:bg-primary/90 transition"
               >
                 Withdraw Funds
               </button>
             </form>
           </div>
 
-          {/* Bookings & Withdrawals */}
-          <div className="lg:col-span-2 bg-card rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl transition-shadow">
+          {/* Tabs Panel */}
+          <div className="lg:col-span-2 bg-card rounded-2xl shadow-lg p-6 border border-border">
             {/* Tabs */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2 mb-6 flex-wrap">
               <button
                 onClick={() => setActiveTab('bookings')}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
                   activeTab === 'bookings'
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <BookMarked className="size-4" />
                 Bookings ({bookings.length})
               </button>
               <button
                 onClick={() => setActiveTab('withdrawals')}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm transition flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
                   activeTab === 'withdrawals'
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <TrendingUp className="size-4" />
                 Withdrawals ({withdrawals.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('reviews')}
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
+                  activeTab === 'reviews'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Reviews ({totalReviews})
               </button>
             </div>
 
@@ -247,7 +281,7 @@ export default function ProviderDashboardPage() {
                   </div>
                 ) : (
                   bookings.map((booking: any) => (
-                    <div key={booking.id} className="border-2 border-border rounded-xl p-4 hover:border-primary/50 hover:bg-muted/20 transition">
+                    <div key={booking.id} className="border-2 border-border rounded-xl p-4 hover:border-primary/50 transition">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex-1">
                           <p className="font-semibold text-foreground">{booking.user?.fullName}</p>
@@ -257,10 +291,10 @@ export default function ProviderDashboardPage() {
                           </p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 whitespace-nowrap ${
-                          booking.status === 'CONFIRMED' ? 'bg-success/10 text-success' :
-                          booking.status === 'COMPLETED' ? 'bg-primary/10 text-primary' :
-                          booking.status === 'CANCELLED' ? 'bg-destructive/10 text-destructive' :
-                          'bg-warning/10 text-warning'
+                          booking.status === 'CONFIRMED' ? 'bg-green-100 text-green-600' :
+                          booking.status === 'COMPLETED' ? 'bg-blue-100 text-blue-600' :
+                          booking.status === 'CANCELLED' ? 'bg-red-100 text-red-600' :
+                          'bg-yellow-100 text-yellow-600'
                         }`}>
                           {booking.status === 'COMPLETED' && <CheckCircle2 className="size-3" />}
                           {booking.status === 'CONFIRMED' && <Clock className="size-3" />}
@@ -272,13 +306,13 @@ export default function ProviderDashboardPage() {
                         <div className="flex gap-2 mt-3">
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'CONFIRMED')}
-                            className="flex-1 bg-success text-success-foreground py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition"
+                            className="flex-1 bg-green-500 text-white py-2 rounded-lg text-xs font-semibold hover:bg-green-600 transition"
                           >
                             Confirm
                           </button>
                           <button
                             onClick={() => updateBookingStatus(booking.id, 'CANCELLED')}
-                            className="flex-1 bg-destructive text-destructive-foreground py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition"
+                            className="flex-1 bg-red-500 text-white py-2 rounded-lg text-xs font-semibold hover:bg-red-600 transition"
                           >
                             Decline
                           </button>
@@ -287,7 +321,7 @@ export default function ProviderDashboardPage() {
                       {booking.status === 'CONFIRMED' && (
                         <button
                           onClick={() => updateBookingStatus(booking.id, 'COMPLETED')}
-                          className="w-full bg-primary text-primary-foreground py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition mt-3"
+                          className="w-full bg-primary text-white py-2 rounded-lg text-xs font-semibold hover:bg-primary/90 transition mt-3"
                         >
                           Mark as Completed
                         </button>
@@ -308,7 +342,7 @@ export default function ProviderDashboardPage() {
                   </div>
                 ) : (
                   withdrawals.map((w: any) => (
-                    <div key={w.id} className="border-2 border-border rounded-xl p-4 hover:border-accent/50 hover:bg-accent/5 transition">
+                    <div key={w.id} className="border-2 border-border rounded-xl p-4 hover:border-accent/50 transition">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <p className="font-semibold text-foreground">₦{w.amount?.toLocaleString()}</p>
@@ -317,12 +351,11 @@ export default function ProviderDashboardPage() {
                             {new Date(w.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 whitespace-nowrap ${
-                          w.status === 'APPROVED' ? 'bg-success/10 text-success' :
-                          w.status === 'REJECTED' ? 'bg-destructive/10 text-destructive' :
-                          'bg-warning/10 text-warning'
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 ${
+                          w.status === 'APPROVED' ? 'bg-green-100 text-green-600' :
+                          w.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
+                          'bg-yellow-100 text-yellow-600'
                         }`}>
-                          {w.status === 'APPROVED' && <CheckCircle2 className="size-3" />}
                           {w.status}
                         </span>
                       </div>
@@ -331,6 +364,78 @@ export default function ProviderDashboardPage() {
                 )}
               </div>
             )}
+
+            {/* Reviews Tab */}
+            {activeTab === 'reviews' && (
+              <div className="space-y-4">
+                {/* Average Rating Summary */}
+                <div className="bg-primary rounded-2xl p-6 text-white text-center mb-6">
+                  <p className="text-blue-200 text-sm mb-1">Your Average Rating</p>
+                  <p className="text-5xl font-black mb-2">{avgRating > 0 ? avgRating : '—'}</p>
+                  <div className="flex justify-center gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <svg
+                        key={star}
+                        className={`w-6 h-6 ${
+                          star <= Math.round(avgRating)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'fill-white/20 text-white/20'
+                        }`}
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <p className="text-blue-200 text-sm">
+                    {totalReviews} review{totalReviews !== 1 ? 's' : ''}
+                  </p>
+                </div>
+
+                {/* Individual Reviews */}
+                {reviews.length === 0 ? (
+                  <div className="text-center py-10 text-gray-500">
+                    <div className="text-4xl mb-2">⭐</div>
+                    <p>No reviews yet</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Complete bookings to start receiving reviews
+                    </p>
+                  </div>
+                ) : (
+                  reviews.map((review: any) => (
+                    <div key={review.id} className="border-2 border-gray-100 rounded-xl p-4 hover:border-primary transition">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-800">{review.reviewerName}</p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg
+                              key={star}
+                              className={`w-4 h-4 ${
+                                star <= review.rating
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'fill-gray-200 text-gray-200'
+                              }`}
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-gray-600 leading-relaxed">{review.comment}</p>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>

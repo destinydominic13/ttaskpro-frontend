@@ -24,10 +24,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const res = await API.post('/auth/user/register', form);
-      window.location.href = `/verify-otp?email=${encodeURIComponent(form.email)}`;
+      saveToken(res.data.token);
+      saveUser(res.data.user);
+      window.location.href = '/';
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {

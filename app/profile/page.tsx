@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import API from "../lib/api";
 import { getUser, logout } from "../lib/auth";
 import Link from "next/link";
+// Add Star icon to existing lucide imports
+import { Star } from 'lucide-react';
 import {
   LogOut,
   Wallet,
@@ -21,6 +23,7 @@ export default function ProfilePage() {
   const [bookings, setBookings] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewedProviders, setReviewedProviders] = useState<string[]>([]);
   const [transferForm, setTransferForm] = useState({
     providerUsername: "",
     amount: "",
@@ -315,29 +318,31 @@ export default function ProfilePage() {
                             {new Date(booking.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 ${
-                            booking.status === "CONFIRMED"
-                              ? "bg-success/10 text-success"
-                              : booking.status === "COMPLETED"
-                              ? "bg-primary/10 text-primary"
-                              : booking.status === "CANCELLED"
-                              ? "bg-destructive/10 text-destructive"
-                              : "bg-warning/10 text-warning"
-                          }`}
-                        >
-                          {booking.status === "COMPLETED" && (
-                            <CheckCircle2 className="size-3" />
-                          )}
-                          {booking.status === "CONFIRMED" && (
-                            <Clock className="size-3" />
-                          )}
-                          {booking.status === "CANCELLED" && (
-                            <XCircle className="size-3" />
-                          )}
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-4 flex items-center gap-1 ${
+                          booking.status === "CONFIRMED"
+                            ? "bg-success/10 text-success"
+                            : booking.status === "COMPLETED"
+                            ? "bg-primary/10 text-primary"
+                            : booking.status === "CANCELLED"
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-warning/10 text-warning"
+                        }`}>
+                          {booking.status === "COMPLETED" && <CheckCircle2 className="size-3" />}
+                          {booking.status === "CONFIRMED" && <Clock className="size-3" />}
+                          {booking.status === "CANCELLED" && <XCircle className="size-3" />}
                           {booking.status}
                         </span>
                       </div>
+                  
+                      {/* Review Form — only for COMPLETED bookings */}
+                      {booking.status === "COMPLETED" && !reviewedProviders.includes(booking.providerId) && (
+  <ReviewForm
+    providerId={booking.providerId}
+    providerName={booking.provider?.fullName}
+    username={user?.username}
+    onReviewed={() => setReviewedProviders(prev => [...prev, booking.providerId])}
+  />
+)}
                     </div>
                   ))
                 )}
@@ -381,4 +386,104 @@ export default function ProfilePage() {
       </div>
     </div>
   );
+
+  function ReviewForm({ providerId, providerName, username, onReviewed }: {
+    providerId: string;
+    providerName: string;
+    username: string;
+    onReviewed: () => void;
+  }) {
+    const [rating, setRating] = useState(0);
+    const [hovered, setHovered] = useState(0);
+    const [comment, setComment] = useState('');
+    const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (rating === 0) {
+        setError('Please select a star rating');
+        return;
+      }
+      setLoading(true);
+      setError('');
+      try {
+        await API.post(`/provider/${providerId}/review`, {
+          reviewerName: username,
+          rating,
+          comment,
+        });
+        setSubmitted(true);
+        onReviewed(); // hide form for all bookings with this provider
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to submit review');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (submitted) {
+      return (
+        <div className="mt-3 bg-green-50 border border-green-200 text-green-600 p-3 rounded-xl text-sm text-center flex items-center justify-center gap-2">
+          <CheckCircle2 className="size-4" />
+          Review submitted! Thank you.
+        </div>
+      );
+    }
+  
+    return (
+      <div className="mt-4 border-t border-border pt-4">
+        <p className="text-sm font-semibold text-foreground mb-3">
+          Rate your experience with {providerName}
+        </p>
+  
+        {error && (
+          <p className="text-xs text-destructive mb-2">{error}</p>
+        )}
+  
+        {/* Star Rating */}
+        <div className="flex gap-1 mb-3">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHovered(star)}
+              onMouseLeave={() => setHovered(0)}
+              className="transition-transform hover:scale-110"
+            >
+              <Star
+                className={`size-6 ${
+                  star <= (hovered || rating)
+                    ? 'fill-yellow-400 text-yellow-400'
+                    : 'text-gray-300'
+                }`}
+              />
+            </button>
+          ))}
+          <span className="text-xs text-muted-foreground ml-2 self-center">
+            {rating > 0 ? ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'][rating] : 'Select rating'}
+          </span>
+        </div>
+  
+        {/* Comment */}
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Share your experience (optional)..."
+          rows={3}
+          className="w-full border-2 border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors bg-background resize-none mb-3"
+        />
+  
+        <button
+          onClick={handleSubmit}
+          disabled={loading || rating === 0}
+          className="w-full bg-primary text-primary-foreground py-2 rounded-xl text-sm font-semibold hover:bg-primary/90 transition disabled:opacity-50"
+        >
+          {loading ? 'Submitting...' : 'Submit Review'}
+        </button>
+      </div>
+    );
+  }
 }
