@@ -118,9 +118,19 @@ export default function ProviderDashboardPage() {
         {/* Profile Header */}
         <div className="bg-gradient-to-r from-primary to-primary/90 rounded-3xl p-8 text-white mb-8 shadow-lg border border-primary/20">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-primary text-4xl font-black ring-4 ring-accent/30 shadow-lg">
-              {profile?.fullName?.charAt(0)}
-            </div>
+          <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-accent/30 shadow-lg">
+  {profile?.profileImage ? (
+    <img
+      src={profile.profileImage}
+      alt={profile.fullName}
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="w-full h-full bg-white flex items-center justify-center text-primary text-4xl font-black">
+      {profile?.fullName?.charAt(0)}
+    </div>
+  )}
+</div>
             <div className="text-center md:text-left flex-1">
               <h1 className="text-3xl md:text-4xl font-black">{profile?.fullName}</h1>
               <p className="text-primary-foreground/80">@{profile?.username}</p>

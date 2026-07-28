@@ -695,13 +695,23 @@ export default function LandingPage() {
               className="bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
             >
               {/* Card Header */}
-              <div className="bg-secondary/20 p-6 text-center">
-                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-3xl font-black mx-auto mb-3">
-                  {provider.fullName.charAt(0)}
-                </div>
-                <h3 className="text-lg font-bold text-primary">{provider.fullName}</h3>
-                <p className="text-sm text-muted-foreground">@{provider.username}</p>
-              </div>
+<div className="bg-secondary/20 p-6 text-center">
+  <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-3 border-2 border-primary">
+    {provider.profileImage ? (
+      <img
+        src={provider.profileImage}
+        alt={provider.fullName}
+        className="w-full h-full object-cover"
+      />
+    ) : (
+      <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-3xl font-black">
+        {provider.fullName.charAt(0)}
+      </div>
+    )}
+  </div>
+  <h3 className="text-lg font-bold text-primary">{provider.fullName}</h3>
+  <p className="text-sm text-muted-foreground">@{provider.username}</p>
+</div>
 
               {/* Card Body */}
               <div className="p-6 space-y-3">
@@ -747,18 +757,26 @@ export default function LandingPage() {
                 )}
 
                 {/* Book Button — only when logged in */}
-                {isLoggedIn && (
-                  <button
-                    onClick={() => setSelectedProviderId(provider.id)}
-                    className={`w-full py-2 rounded-xl text-sm font-semibold transition mt-2 ${
-                      selectedProviderId === provider.id
-                        ? 'bg-accent text-accent-foreground'
-                        : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    }`}
-                  >
-                    {selectedProviderId === provider.id ? '✓ Selected' : 'Select Provider'}
-                  </button>
-                )}
+                <div className="flex gap-2 mt-2">
+  <Link
+    href={`/provider/${provider.id}`}
+    className="flex-1 border-2 border-primary text-primary py-2 rounded-xl text-sm font-semibold text-center hover:bg-primary/5 transition"
+  >
+    See Reviews
+  </Link>
+  {isLoggedIn && (
+    <button
+      onClick={() => setSelectedProviderId(provider.id)}
+      className={`flex-1 py-2 rounded-xl text-sm font-semibold transition ${
+        selectedProviderId === provider.id
+          ? 'bg-accent text-accent-foreground'
+          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+      }`}
+    >
+      {selectedProviderId === provider.id ? '✓ Selected' : 'Book'}
+    </button>
+  )}
+</div>
               </div>
             </div>
           ))}
