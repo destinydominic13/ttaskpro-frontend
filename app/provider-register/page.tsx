@@ -18,6 +18,8 @@ export default function ProviderRegisterPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'granted' | 'denied'>('idle');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,6 +33,26 @@ export default function ProviderRegisterPage() {
       setProfileImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
+  };
+
+  const getLocation = () => {
+    setLocationStatus('loading');
+    if (!navigator.geolocation) {
+      setLocationStatus('denied');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationStatus('granted');
+      },
+      () => {
+        setLocationStatus('denied');
+      }
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,6 +75,11 @@ export default function ProviderRegisterPage() {
         formData.append('profileImage', profileImage);
       }
 
+      if (location) {
+        formData.append('latitude', location.latitude.toString());
+        formData.append('longitude', location.longitude.toString());
+      }
+
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:3000/auth/provider/register', {
         method: 'POST',
@@ -68,7 +95,7 @@ export default function ProviderRegisterPage() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.provider));
-      window.location.href = '/';
+      window.location.href = '/provider-dashboard';
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -329,6 +356,33 @@ export default function ProviderRegisterPage() {
                 placeholder="e.g. mopping, dusting, ironing"
               />
             </div>
+
+                  {/* Location */}
+                  <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center">
+                    {locationStatus === 'granted' ? (
+                      <div className="text-green-600 text-sm font-semibold flex items-center justify-center gap-2">
+                        <span>✅</span> Location captured successfully!
+                      </div>
+                    ) : locationStatus === 'denied' ? (
+                      <div className="text-red-500 text-sm">
+                        Location access denied. You can still register without it.
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-sm text-gray-500 mb-2">
+                          Share your location so users can find you nearby
+                        </p>
+                        <button
+                          type="button"
+                          onClick={getLocation}
+                          disabled={locationStatus === 'loading'}
+                          className="bg-[#0d2d6e] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#0a2458] transition disabled:opacity-60"
+                        >
+                          {locationStatus === 'loading' ? 'Getting location...' : '📍 Share My Location'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
             <button
               type="submit"

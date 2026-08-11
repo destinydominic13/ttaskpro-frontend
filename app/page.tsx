@@ -139,6 +139,9 @@ export default function LandingPage() {
   const [bookingMsg, setBookingMsg] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [maxDistance, setMaxDistance] = useState<number>(50); // km
+  const [filterByLocation, setFilterByLocation] = useState(false);
 
   const handleBooking = async () => {
     setBookingMsg("");
@@ -177,13 +180,52 @@ export default function LandingPage() {
     }
   };
 
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+  
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setFilterByLocation(true);
+      });
+    }
+  };
+
   const filtered = providers.filter((p: any) => {
     const matchSearch =
       p.fullName.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase());
     const matchCategory = category ? p.category === category : true;
-    return matchSearch && matchCategory;
+  
+    let matchDistance = true;
+    if (filterByLocation && userLocation && p.latitude && p.longitude) {
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        p.latitude,
+        p.longitude
+      );
+      matchDistance = distance <= maxDistance;
+      p.distance = Math.round(distance * 10) / 10;
+    }
+  
+    return matchSearch && matchCategory && matchDistance;
   });
+
+
+  
 
  
   // ============ LOGGED OUT VIEW (Marketing Landing Page) ============
@@ -656,37 +698,81 @@ export default function LandingPage() {
       </div>
     ) : (
       <>
-        {/* Search + Filter — only when logged in */}
         {isLoggedIn && (
-          <div className="flex flex-col md:flex-row gap-3 mb-8">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by name or category..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
+  <div className="flex flex-col gap-3 mb-8">
+    {/* Search + Category */}
+    <div className="flex flex-col md:flex-row gap-3">
+      <div className="flex-1 relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search by name or category..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+        />
+      </div>
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+      >
+        <option value="">All Categories</option>
+        <option value="Cleaning">Cleaning</option>
+        <option value="Plumbing">Plumbing</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Carpentry">Carpentry</option>
+        <option value="Painting">Painting</option>
+        <option value="Gardening">Gardening</option>
+        <option value="Cooking">Cooking</option>
+        <option value="Laundry">Laundry</option>
+        <option value="Moving">Moving</option>
+      </select>
+    </div>
+
+    {/* Location Filter */}
+    <div className="flex flex-col sm:flex-row items-center gap-3 bg-white/10 rounded-xl p-3">
+      <button
+        onClick={getUserLocation}
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition ${
+          filterByLocation
+            ? 'bg-accent text-accent-foreground'
+            : 'bg-white/20 text-primary-foreground hover:bg-white/30'
+        }`}
+      >
+        <MapPin className="size-4" />
+        {filterByLocation ? '📍 Location Filter ON' : 'Filter by Location'}
+      </button>
+      {filterByLocation && (
+        <>
+          <div className="flex items-center gap-2 text-primary-foreground text-sm">
+            <span>Within</span>
             <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
+              value={maxDistance}
+              onChange={(e) => setMaxDistance(Number(e.target.value))}
+              className="bg-white text-foreground px-2 py-1 rounded-lg text-sm font-semibold"
             >
-              <option value="">All Categories</option>
-              <option value="Cleaning">Cleaning</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Carpentry">Carpentry</option>
-              <option value="Painting">Painting</option>
-              <option value="Gardening">Gardening</option>
-              <option value="Cooking">Cooking</option>
-              <option value="Laundry">Laundry</option>
-              <option value="Moving">Moving</option>
+              <option value={5}>5 km</option>
+              <option value={10}>10 km</option>
+              <option value={20}>20 km</option>
+              <option value={50}>50 km</option>
+              <option value={100}>100 km</option>
             </select>
           </div>
-        )}
+          <span className="text-primary-foreground/70 text-sm">
+            {filtered.length} provider{filtered.length !== 1 ? 's' : ''} found nearby
+          </span>
+          <button
+            onClick={() => { setFilterByLocation(false); setUserLocation(null); }}
+            className="text-xs text-primary-foreground/70 hover:text-primary-foreground underline ml-auto"
+          >
+            Clear filter
+          </button>
+        </>
+      )}
+    </div>
+  </div>
+)}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {(isLoggedIn ? filtered : providers).slice(0, 6).map((provider: any) => (
@@ -742,6 +828,14 @@ export default function LandingPage() {
                       : 'No reviews yet'}
                   </span>
                 </div>
+
+                {/* Distance Badge */}
+                  {filterByLocation && (provider as any).distance !== undefined && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="size-3" />
+                      <span>{(provider as any).distance} km away</span>
+                    </div>
+                  )}
 
                 {provider.skills?.length > 0 && (
                   <div className="flex flex-wrap gap-1">
