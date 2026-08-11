@@ -85,6 +85,13 @@ const whyChoose = [
   },
 ];
 
+const providerIllustration = (category = "") => {
+  const normalized = category.toLowerCase();
+  if (normalized.includes("plumb")) return "/images/expert-1.png";
+  if (normalized.includes("electric")) return "/images/expert-3.png";
+  return "/images/expert-2.png";
+};
+
 const experts = [
   {
     name: "Rosalina D. William",
@@ -626,7 +633,7 @@ export default function LandingPage() {
   {/* Service Providers */}
 <section id="experts" className="bg-primary px-6 py-20 md:py-24">
   <div className="max-w-7xl mx-auto">
-    <div className="flex items-end justify-between mb-12">
+    <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-12">
       <div>
         <span className="text-accent font-bold uppercase tracking-wide text-sm">
           Professionals
@@ -658,22 +665,23 @@ export default function LandingPage() {
       <>
         {/* Search + Filter — only when logged in */}
         {isLoggedIn && (
-          <div className="flex flex-col md:flex-row gap-3 mb-8">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by name or category..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-3 rounded-xl text-foreground bg-card focus:outline-none focus:ring-2 focus:ring-accent"
-            >
+          <div className="mb-8 rounded-[2rem] border border-white/15 bg-card p-3 shadow-2xl shadow-black/20 md:p-4">
+            <div className="flex flex-col gap-3 md:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-primary" />
+                <input
+                  type="text"
+                  placeholder="Search by name or category..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-2xl border border-border bg-background py-3 pl-11 pr-4 text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15"
+                />
+              </div>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="rounded-2xl border border-border bg-background px-4 py-3 text-foreground outline-none transition focus:border-accent focus:ring-4 focus:ring-accent/15 md:min-w-52"
+              >
               <option value="">All Categories</option>
               <option value="Cleaning">Cleaning</option>
               <option value="Plumbing">Plumbing</option>
@@ -684,32 +692,27 @@ export default function LandingPage() {
               <option value="Cooking">Cooking</option>
               <option value="Laundry">Laundry</option>
               <option value="Moving">Moving</option>
-            </select>
+              </select>
+            </div>
           </div>
         )}
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {(isLoggedIn ? filtered : providers).slice(0, 6).map((provider: any) => (
             <div
               key={provider.id}
-              className="bg-card rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+              className="group overflow-hidden rounded-[2rem] border border-white/70 bg-card shadow-xl shadow-black/10 transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
             >
               {/* Card Header */}
-<div className="bg-secondary/20 p-6 text-center">
-  <div className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-3 border-2 border-primary">
-    {provider.profileImage ? (
-      <img
-        src={provider.profileImage}
-        alt={provider.fullName}
-        className="w-full h-full object-cover"
-      />
-    ) : (
-      <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground text-3xl font-black">
-        {provider.fullName.charAt(0)}
-      </div>
-    )}
+<div className="bg-gradient-to-br from-secondary to-background p-6 text-center">
+	<div className="mx-auto mb-3 size-24 overflow-hidden rounded-[1.5rem] border-4 border-accent bg-primary shadow-lg transition-transform duration-300 group-hover:rotate-2 group-hover:scale-105">
+    <img
+      src={providerIllustration(provider.category)}
+      alt={`${provider.fullName}, illustrated service provider`}
+      className="h-full w-full object-cover"
+    />
   </div>
-  <h3 className="text-lg font-bold text-primary">{provider.fullName}</h3>
+  <h3 className="text-lg font-black text-primary">{provider.fullName}</h3>
   <p className="text-sm text-muted-foreground">@{provider.username}</p>
 </div>
 
